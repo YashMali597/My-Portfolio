@@ -149,39 +149,29 @@ a {
    ABOUT
 ========================= */
 .about-section {
-  position: relative;
+  padding: 100px 0;
 }
 
-.about-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 40px;
-  align-items: start;
+.about-container {
+  max-width: 900px;
+  margin: 0 auto;            /* 👈 THIS centers the section */
+  text-align: center;        /* Balanced look */
 }
 
-.about-left {
-  max-width: 600px;
-  margin-left: 0;
-  z-index: 1;
+.about-text {
+  margin-top: 25px;
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: #cfd8dc;
 }
 
-.about-left p {
-  margin-bottom: 15px;
-  color: #a8b2d1;
+/* Optional: on large screens, slightly left-align text for readability */
+@media (min-width: 992px) {
+  .about-container {
+    text-align: left;
+  }
 }
 
-.about-right-bg {
-  background: repeating-linear-gradient(
-    45deg,
-    rgba(0, 229, 255, 0.05),
-    rgba(0, 229, 255, 0.05) 2px,
-    transparent 2px,
-    transparent 10px
-  );
-  border-radius: 16px;
-  height: 100%;
-  width: 100%;
-}
 
 /* =========================
    SKILLS

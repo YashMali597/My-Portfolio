@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 export default function Skills() {
   const skills = [
     {
-      title: "Software Engineering",
+      title: "Software Engineering         ⯆",
       items: [
         "Python, C#, JavaScript, TypeScript",
         "Node JS, .NET, MVC Architecture",
@@ -14,7 +14,7 @@ export default function Skills() {
       ],
     },
     {
-      title: "Data & Analytics",
+      title: "Data & Analytics        ⯆",
       items: [
         "SQL, Advanced Excel",
         "Databricks, Airflow, dBt, Spark",
@@ -25,7 +25,7 @@ export default function Skills() {
       ],
     },
     {
-      title: "AI & Product Management",
+      title: "AI & Product Management        ⯆",
       items: [
         "Large Language Models, Machine Learning, Agentic AI",
         "Claude Code, Jira AI, Cursor, Notion AI, LangChain",

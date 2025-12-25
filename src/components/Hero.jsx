@@ -39,7 +39,7 @@ export default function Hero() {
         transition={{ duration: 1 }}
       >
         <motion.img
-          src="/yash.jpg"
+          src="./yash.jpg"
           alt="Yash"
           className="hero-img"
           whileHover={{ scale: 1.05 }}

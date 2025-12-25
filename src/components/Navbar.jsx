@@ -7,7 +7,7 @@ export default function Navbar() {
         </span>
 
         <a
-          href="/resume.pdf"
+          href="./resume.pdf"
           download
           className="btn btn-sm btn-outline-info"
         >
