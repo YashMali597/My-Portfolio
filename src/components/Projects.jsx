@@ -3,11 +3,11 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const projects = [
   {
-    title: "AI Workflow Automation Platform ",
-    desc: "Built a full-stack ML workflow tool with Python, TypeScript, and React, automating data processing, annotation, and real-time model monitoring.",
-    tech: "Python, React, TypeScript, FastAPI, Neural Networks",
-    category: "AI",
-  },
+  title: "SupplySightAI – Agentic Supply Chain Intelligence",
+  desc: "Built an agentic AI platform that autonomously analyzes supply chain data, detects risks, explains root causes, forecasts disruptions, and recommends prioritized actions.",
+  tech: "Python, Pandas, Scikit-learn, Streamlit, Multi-Agent AI",
+  category: "AI",
+ },
   {
   title: "ParcelPal – Route Optimization",
   desc: "Built a delivery route optimizer with Dijkstra’s Algorithm, improving efficiency and reducing operational costs.",
@@ -20,12 +20,13 @@ const projects = [
   tech: "Python, NLP, Machine Learning, Pandas, NumPy, Scikit-learn, Flask, REST APIs",
   category: "AI",
   },
-  {
-  title: "Customer Segmentation & Purchase Behavior Analysis",
-  desc: "Performed data preprocessing and EDA on customer transactions, then applied K-Means clustering to segment customers by purchase patterns and preferences.",
-  tech: "Python, Pandas, NumPy, Scikit-learn, Matplotlib, Seaborn, Data Analysis, K-Means Clustering",
-  category: "Data",
- }
+ {
+  title: "AI-Driven Customer Segmentation & Churn Intelligence",
+  desc: "Built an AI-powered customer intelligence system that analyzes purchase behavior, segments customers, predicts churn and lifetime value, and recommends next-best actions to drive retention and revenue growth.",
+  tech: "Python, Pandas, NumPy, Scikit-learn, Machine Learning, Predictive Analytics",
+  category: "AI",
+  }
+
 
 ];
 
