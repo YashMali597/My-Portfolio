@@ -28,7 +28,6 @@ export default function Skills() {
       title: "AI & Product Management        ⯆",
       items: [
         "Large Language Models, Machine Learning, Agentic AI",
-        "Claude Code, Jira AI, Cursor, Notion AI, LangChain",
         "Agile Scrum Methodologies",
         "A/B Testing & Experimentation",
         "User-Centric & Data-Driven Decisions",
