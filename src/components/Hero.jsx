@@ -4,10 +4,9 @@ import { useTypewriter, Cursor } from "react-simple-typewriter";
 export default function Hero() {
   const [text] = useTypewriter({
     words: [
-      "Software Engineer",
+      "AI Engineer",
       "Data Scientist",
-      "Data Engineer",
-      "Product Manager",
+      "AI Product Manager"
     ],
     loop: true,
     delaySpeed: 2000,

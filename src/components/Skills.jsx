@@ -2,38 +2,55 @@ import { motion } from "framer-motion";
 
 export default function Skills() {
   const skills = [
-    {
-      title: "Software Engineering         ⯆",
-      items: [
-        "Python, C#, JavaScript, TypeScript",
-        "Node JS, .NET, MVC Architecture",
-        "REST APIs, Microservices",
-        "Git, CI/CD, Azure DevOps",
-        "Microsoft Azure, Snowflake"
-        ,
-      ],
-    },
-    {
-      title: "Data & Analytics        ⯆",
-      items: [
-        "SQL, Advanced Excel",
-        "Databricks, Airflow, dBt, Spark",
-        "ETL Pipelines & Data Modeling",
-        "Power BI, Tableau",
-        "Pandas, Data Cleaning",
-        "Metrics, KPIs, Dashboards",
-      ],
-    },
-    {
-      title: "AI & Product Management        ⯆",
-      items: [
-        "Large Language Models, Machine Learning, Agentic AI",
-        "Agile Scrum Methodologies",
-        "A/B Testing & Experimentation",
-        "User-Centric & Data-Driven Decisions",
-      ],
-    },
-  ];
+  {
+    title: "Programming & Development        ⯆",
+    items: [
+      "Python, SQL, C#, JavaScript, TypeScript",
+      "REST APIs, FastAPI",
+      ".NET, MVC Architecture",
+      "Git, Azure DevOps CI/CD",
+      "Docker",
+    ],
+  },
+  {
+    title: "AI & Machine Learning        ⯆",
+    items: [
+      "Machine Learning, NLP",
+      "LLMs (GPT, Claude-style models)",
+      "Prompt Engineering, Agentic Workflows",
+      "GenAI POC Development",
+      "AI API Integration, Workflow Automation",
+    ],
+  },
+  {
+    title: "Frameworks & Tools        ⯆",
+    items: [
+      "PyTorch, TensorFlow",
+      "scikit-learn, OpenCV",
+      "LangChain",
+
+    ],
+  },
+  {
+    title: "Data & Analytics        ⯆",
+    items: [
+      "EDA, Predictive Modeling",
+      "A/B Testing, Behavioral Analysis",
+      "Power BI, Tableau",
+      "KPI Tracking, Product Analytics",
+    ],
+  },
+  {
+    title: "Product Skills        ⯆",
+    items: [
+      "Product Strategy",
+      "Requirements Gathering",
+      "User Stories",
+      "Feature Prioritization",
+      "Experimentation",
+    ],
+  },
+];
 
   return (
     <section className="section bg-dark text-light">

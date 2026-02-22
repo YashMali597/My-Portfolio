@@ -3,47 +3,55 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const projects = [
   {
-  title: "SupplySightAI – Agentic Supply Chain Intelligence",
-  desc: "Built an agentic AI platform that autonomously analyzes supply chain data, detects risks, explains root causes, forecasts disruptions, and recommends prioritized actions.",
-  tech: "Python, Pandas, Scikit-learn, Streamlit, Multi-Agent AI",
-  category: "AI",
- },
-  {
-  title: "ParcelPal – Route Optimization",
-  desc: "Built a delivery route optimizer with Dijkstra’s Algorithm, improving efficiency and reducing operational costs.",
-  tech: "JavaScript, React, Node.js, Express, MongoDB, REST APIs",
-  category: "Software",
+    id: 1,
+    title: "SupplySightAI – Agentic Supply Chain Intelligence",
+    desc: "Built an agentic AI platform that autonomously analyzes supply chain data, detects risks, explains root causes, forecasts disruptions, and recommends prioritized actions.",
+    tech: "Python, Pandas, Scikit-learn, Streamlit, Multi-Agent AI",
+    categories: ["AI", "Software"]
   },
   {
-  title: "IEEE Student Branch Chatbot",
-  desc: "Built and deployed an NLP chatbot using Python and ML, automating student queries and boosting engagement by 40%.",
-  tech: "Python, NLP, Machine Learning, Pandas, NumPy, Scikit-learn, Flask, REST APIs",
-  category: "AI",
+    id: 2,
+    title: "ParcelPal – Route Optimization",
+    desc: "Built a delivery route optimizer with Dijkstra’s Algorithm, improving efficiency and reducing operational costs.",
+    tech: "JavaScript, React, Node.js, Express, MongoDB, REST APIs",
+    categories: ["Software", "Data"]
   },
- {
-  title: "AI-Driven Customer Segmentation & Churn Intelligence",
-  desc: "Built an AI-powered customer intelligence system that analyzes purchase behavior, segments customers, predicts churn and lifetime value, and recommends next-best actions to drive retention and revenue growth.",
-  tech: "Python, Pandas, NumPy, Scikit-learn, Machine Learning, Predictive Analytics",
-  category: "AI",
+  {
+    id: 3,
+    title: "AI-Enabled Customer Segmentation & Churn Prediction System",
+    desc: "Developed predictive models using EDA and behavioral analytics on 100K+ customer records to identify churn risk and enable next-best-action recommendations, improving targeted retention by 12%.",
+    tech: "Python, Pandas, NumPy, scikit-learn, Predictive Modeling, EDA, Classification, Clustering",
+    categories: ["AI", "Data"]
+  },
+  {
+    id: 4,
+    title: "AI Causal Intelligence System",
+    desc: "Built an uplift-based targeting system using causal inference on 100K+ user A/B simulation data to identify high-impact segments and optimize budget allocation, simulating $684K+ incremental revenue.",
+    tech: "Python, scikit-learn, Causal Inference, A/B Testing, Predictive Modeling, Data Analytics",
+    categories: ["AI", "Data"]
   }
-
-
 ];
 
 export default function Projects() {
   const [filter, setFilter] = useState("All");
 
+  const categories = ["All", "Software", "Data", "AI"];
+
   const filteredProjects =
-    filter === "All" ? projects : projects.filter(p => p.category === filter);
+    filter === "All"
+      ? projects
+      : projects.filter(project =>
+          project.categories.includes(filter)
+        );
 
   return (
     <section className="section bg-dark text-light">
       <div className="container">
         <h2 className="section-title">Projects</h2>
 
-        {/* Filter buttons */}
+        {/* Filter Buttons */}
         <div className="project-filters mb-4">
-          {["All", "Software", "Data", "AI"].map(cat => (
+          {categories.map(cat => (
             <button
               key={cat}
               className={`filter-btn ${filter === cat ? "active" : ""}`}
@@ -54,24 +62,36 @@ export default function Projects() {
           ))}
         </div>
 
+        {/* Projects Grid */}
         <div className="row g-4">
           <AnimatePresence>
-            {filteredProjects.map((proj, idx) => (
+            {filteredProjects.map(project => (
               <motion.div
-                key={proj.title}
+                key={project.id}
                 className="col-md-6"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 20 }}
                 transition={{ duration: 0.3 }}
+                layout
               >
                 <motion.div
-                  className="project-card"
+                  className="project-card p-3"
                   whileHover={{ y: -8 }}
                 >
-                  <h5 className="project-title">{proj.title}</h5>
-                  <p className="project-desc">{proj.desc}</p>
-                  <span className="project-tech">{proj.tech}</span>
+                  <h5 className="project-title">{project.title}</h5>
+                  <p className="project-desc">{project.desc}</p>
+
+                  {/* Category Tags */}
+                  <div className="mb-2">
+                    {project.categories.map(cat => (
+                      <span key={cat} className="badge bg-primary me-2">
+                        {cat}
+                      </span>
+                    ))}
+                  </div>
+
+                  <span className="project-tech">{project.tech}</span>
                 </motion.div>
               </motion.div>
             ))}
