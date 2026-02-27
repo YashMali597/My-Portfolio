@@ -21,9 +21,9 @@ export default function Experience() {
           <h5>Deep Learning Intern</h5>
           <p className="text-info">Wizphys AI</p>
           <ul>
-            <li>Built high-throughput ML pipelines using PyTorch and TensorFlow, reducing model training time by 15%</li>
-            <li>Optimized model workflows through hyperparameter tuning and cross-validation, improving prediction accuracy by 15%</li>
-            <li>Integrated ML-driven personalization features , boosting user engagement by 18%</li>
+           <li>Built and shipped real-time exercise detection features for a physiotherapy mobile app using PoseNet keypoint extraction and PyTorch-based classification models</li>
+          <li>Engineered skeletal keypoint pipelines and optimized models via hyperparameter tuning and cross-validation, improving prediction accuracy by 15%</li>
+          <li>Deployed ML-driven features to production users, increasing session completion and engagement by 18% through iterative performance improvements</li>
           </ul>
         </div>
       </div>
