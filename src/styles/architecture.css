@@ -1,0 +1,210 @@
+/* =========================
+   PIPELINE DIAGRAM
+========================= */
+.pipeline-diagram-wrapper {
+  margin-top: 1.1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-hairline);
+}
+
+/* Legend / telemetry strip */
+.pipeline-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+}
+
+.pipeline-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.pipeline-legend-item + .pipeline-legend-item::before {
+  content: "·";
+  margin: 0 10px;
+  color: var(--text-dim);
+}
+
+/* Diagram flow */
+.pipeline-diagram {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.pipeline-node-wrapper {
+  position: relative;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.pipeline-node {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.9rem;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-hairline);
+  border-radius: 10px;
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.pipeline-node:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 2px;
+}
+
+.pipeline-node--active {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 16px rgba(34, 211, 238, 0.3);
+  transform: translateY(-2px);
+}
+
+.pipeline-node--dimmed {
+  opacity: 0.45;
+}
+
+.pipeline-node-icon {
+  display: inline-flex;
+  color: var(--accent-cyan);
+}
+
+.pipeline-node-status {
+  flex-shrink: 0;
+}
+
+.pipeline-node-label {
+  font-weight: 500;
+}
+
+/* Tooltip / popover */
+.pipeline-tooltip {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: 240px;
+  padding: 0.7rem 0.9rem;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--text-primary);
+  z-index: 5;
+  text-align: left;
+}
+
+/* Connectors */
+.pipeline-connector {
+  flex: 1 1 40px;
+  min-width: 24px;
+  height: 4px;
+  align-self: center;
+  margin: 0 2px;
+}
+
+.pipeline-connector-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.pipeline-connector-svg--vertical {
+  display: none;
+}
+
+.pipeline-connector-line {
+  stroke: var(--border-hairline-glow);
+  stroke-width: 2;
+}
+
+.pipeline-connector-pulse {
+  stroke: var(--accent-cyan);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 10 90;
+  filter: drop-shadow(0 0 3px rgba(34, 211, 238, 0.9));
+  animation: pipeline-pulse-travel 2s linear infinite;
+}
+
+@keyframes pipeline-pulse-travel {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: -100;
+  }
+}
+
+.pipeline-connector-pulse--vertical {
+  animation-name: pipeline-pulse-travel;
+}
+
+/* =========================
+   RESPONSIVE — vertical flow on small screens
+========================= */
+/* Raised from 640px: at 768px (tablet) the horizontal 5-node layout needs
+   ~1000px+ to fit without overflowing — verified via a real overflow audit,
+   not just a guess. Vertical stacking is the correct fallback well before
+   desktop widths. */
+@media (max-width: 991px) {
+  .pipeline-diagram {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .pipeline-node-wrapper {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .pipeline-node {
+    width: 100%;
+  }
+
+  /* Full width would overflow to the right of a full-width node — flow the
+     tooltip below it instead, as a second row in the wrapped flex wrapper. */
+  .pipeline-tooltip {
+    position: static;
+    flex: 0 0 100%;
+    width: 100%;
+    max-width: 100%;
+    transform: none;
+    margin-top: 0.6rem;
+  }
+
+  .pipeline-connector {
+    flex: 0 0 28px;
+    width: 4px;
+    height: 28px;
+    margin: 2px 0 2px 1.4rem;
+  }
+
+  .pipeline-connector-svg--horizontal {
+    display: none;
+  }
+
+  .pipeline-connector-svg--vertical {
+    display: block;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pipeline-connector-pulse {
+    animation: none !important;
+  }
+}

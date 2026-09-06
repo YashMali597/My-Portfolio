@@ -1,0 +1,1535 @@
+{
+  "summary": {
+    "generatedAt": "2026-09-06T15:48:37.660Z",
+    "models": {
+      "router": "openai/gpt-oss-20b",
+      "routerProvider": "groq",
+      "generation": "openai/gpt-oss-120b",
+      "generationProvider": "groq",
+      "judge": "openai/gpt-oss-20b"
+    },
+    "datasetVersion": 1,
+    "itemCount": 30,
+    "retrieval": {
+      "passed": 18,
+      "total": 27,
+      "rate": 0.6666666666666666
+    },
+    "sectionPrecision": {
+      "passed": 11,
+      "total": 14,
+      "rate": 0.7857142857142857
+    },
+    "groundedness": {
+      "passed": 2,
+      "total": 13,
+      "rate": 0.15384615384615385
+    },
+    "behaviour": {
+      "passed": 19,
+      "total": 30,
+      "rate": 0.6333333333333333
+    },
+    "byMode": {
+      "answer": {
+        "passed": 15,
+        "total": 24,
+        "rate": 0.625
+      },
+      "not_documented": {
+        "passed": 1,
+        "total": 3,
+        "rate": 0.3333333333333333
+      },
+      "clarify": {
+        "passed": 1,
+        "total": 1,
+        "rate": 1
+      },
+      "decline": {
+        "passed": 2,
+        "total": 2,
+        "rate": 1
+      }
+    },
+    "latencyMs": {
+      "mean": 24561,
+      "p50": 27463,
+      "p95": 75256,
+      "max": 93450
+    },
+    "tokens": {
+      "input": 84442,
+      "output": 12719,
+      "reported": true
+    },
+    "estimatedCostUsd": 0.0135,
+    "errors": 9
+  },
+  "results": [
+    {
+      "answer": "The Commodity Intelligence Platform is built as a five‑stage Medallion pipeline in Microsoft Fabric:\n\n1. **Raw Extraction** – Commodity and market feeds are pulled straight from the source and handed off unchanged.  \n2. **Bronze (Raw Ingest)** – The feed lands in an append‑only “bronze” zone, preserving every original record for full lineage and re‑processing capability.  \n3. **Silver (Cleansed)** – Bronze data is cleaned, validated and conformed to a consistent schema; duplicates are removed and formats are standardized.  \n4. **Gold (Curated)** – The cleaned silver tables are aggregated into business‑ready, query‑optimized tables that the reporting layer reads.  \n5. **Direct Lake Dashboards** – Power BI connects directly to the gold tables in Direct Lake mode, eliminating any scheduled import or refresh and delivering near‑real‑time visuals to decision‑makers.\n\nKey design choices—using Direct Lake instead of Import mode, keeping the bronze layer append‑only, and separating cleaning (silver) from aggregation (gold)—ensure low latency, full data lineage, and easy rebuilds if transformation logic changes. *(from the Commodity Intelligence Platform Architecture and Decisions sections)*",
+      "chunks": [
+        {
+          "sourceFile": "knowledge/projects/commodity-intelligence-platform.md",
+          "heading": "Overview",
+          "text": "An automated pipeline that extracts raw commodity/market data, processes it\nthrough a Microsoft Fabric medallion architecture (bronze → silver → gold), and\nsurfaces it in Direct Lake mode Power BI dashboards for near-real-time\ndecision-making.",
+          "score": 0.6915
+        },
+        {
+          "sourceFile": "knowledge/projects/commodity-intelligence-platform.md",
+          "heading": "Impact",
+          "text": "Delivered near-real-time commodity and market visibility to decision-makers by\nremoving the scheduled-refresh lag between the curated data layer and the\ndashboards reading it.",
+          "score": 0.5705
+        },
+        {
+          "sourceFile": "knowledge/projects/commodity-intelligence-platform.md",
+          "heading": "Problem",
+          "text": "Commodity and market data arrives continuously from external feeds, but the\ndecisions it should inform are time-sensitive. A traditional import-and-refresh\nBI setup puts a scheduled refresh between the data and the decision — the\ndashboard is always some hours behind reality, and the gap is invisible to\nwhoever is reading it.\n\nThe platform's job is to get raw market feeds into a trustworthy, query-ready\nshape and in front of decision-makers with as little latency as the reporting\nlayer allows.",
+          "score": 0.5436
+        },
+        {
+          "sourceFile": "knowledge/projects/commodity-intelligence-platform.md",
+          "heading": "Architecture",
+          "text": "Five stages, implemented as a **Microsoft Fabric medallion architecture** with a\nDirect Lake reporting layer. These stage descriptions are migrated verbatim from\nthe interactive pipeline diagram on the previous site.\n\n**1. Raw Extraction** *(icon: Database)*\nRaw commodity and market data is pulled from source feeds into the pipeline,\nunchanged and untransformed — the entry point for everything downstream.\n\n**2. Bronze — Raw Ingest** *(icon: Layers)*\nExtracted data lands in the `bronze` layer exactly as received — a raw,\nappend-only landing zone that preserves the original records for lineage and\nreprocessing.\n\n**3. Silver — Cleansed** *(icon: Filter)*\nBronze records are cleaned, validated, and conformed into a consistent schema in\nthe `silver` layer, removing duplicates and standardizing formats.\n\n**4. Gold — Curated** *(icon: Gem)*\nSilver data is aggregated into business-ready tables in the `gold` layer — the\ncurated, query-optimized layer that reporting tools read from.\n\n**5. Direct Lake Dashboards** *(icon: LayoutDashboard, status: active)*\nPower BI queries the `gold` layer directly in `Direct Lake` mode — no import or\nscheduled refresh — so dashboards reflect near-real-time data for\ndecision-making.",
+          "score": 0.5396
+        },
+        {
+          "sourceFile": "knowledge/projects/commodity-intelligence-platform.md",
+          "heading": "Challenges",
+          "text": "**Direct Lake has constraints Import mode doesn't.** Reading gold tables in place\nmeans the gold layer's physical shape directly determines dashboard performance\n— modeling mistakes surface as slow visuals rather than slow refreshes.\n\n**Schema drift from upstream feeds.** External commodity/market sources change\nshape without notice, and an append-only bronze layer means the drift lands\nintact and has to be absorbed in the bronze → silver transformation.\n\n**Deduplication across an append-only landing zone.** Because bronze never\noverwrites, silver carries the full burden of resolving duplicate and superseded\nrecords into a single consistent view.",
+          "score": 0.4802
+        },
+        {
+          "sourceFile": "knowledge/projects/commodity-intelligence-platform.md",
+          "heading": "Key decisions",
+          "text": "**Direct Lake instead of Import mode.** This is the decision that makes the\n\"near-real-time\" claim true rather than aspirational. Import mode would put a\nscheduled refresh between the gold layer and the dashboard; Direct Lake has\nPower BI read the gold tables in place, so there is no refresh window to fall\nbehind in.\n\n**Append-only bronze.** Landing data exactly as received — untransformed — costs\nstorage but buys lineage and full reprocessing. If a transformation rule turns\nout to be wrong, silver and gold can be rebuilt from bronze without going back\nto the source feeds.\n\n**Cleaning in silver, aggregation in gold.** Keeping deduplication and schema\nconformance separate from business aggregation means each layer has one job, and\na bad number can be traced to the layer that produced it.\n\n**Gold optimized for query, not for completeness.** The gold layer is shaped for\nwhat the dashboards ask, which is what allows Direct Lake to stay fast.",
+          "score": 0.4682
+        }
+      ],
+      "tools": [
+        "getProject"
+      ],
+      "latencyMs": 2754,
+      "usage": {
+        "input": 3829,
+        "output": 432
+      },
+      "intent": "project_deep_dive",
+      "entitySlug": "commodity-intelligence-platform",
+      "confidence": 0.9,
+      "id": "commodity-01",
+      "question": "How does the Commodity Intelligence Platform pipeline work?",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/commodity-intelligence-platform.md",
+      "expectedSection": "Architecture",
+      "retrievalHit": true,
+      "sectionHit": true,
+      "behaviourPass": true,
+      "behaviourNote": "answered",
+      "grounded": null,
+      "judgeVerdict": "PARSE_ERROR",
+      "judgeReason": ""
+    },
+    {
+      "answer": "That’s not something I’ve documented here.",
+      "chunks": [],
+      "tools": [],
+      "latencyMs": 1445,
+      "usage": {
+        "input": 1209,
+        "output": 125
+      },
+      "intent": "out_of_scope",
+      "confidence": 0.3,
+      "id": "commodity-02",
+      "question": "Why did he use Direct Lake mode instead of importing the data into Power BI?",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/commodity-intelligence-platform.md",
+      "expectedSection": "Key decisions",
+      "retrievalHit": false,
+      "sectionHit": false,
+      "behaviourPass": true,
+      "behaviourNote": "answered",
+      "grounded": false,
+      "judgeVerdict": "NO",
+      "judgeReason": "Claim that the answerer hasn’t documented something is unsupported by the empty context."
+    },
+    {
+      "answer": "",
+      "chunks": [
+        {
+          "sourceFile": "knowledge/projects/commodity-intelligence-platform.md",
+          "heading": "Challenges",
+          "text": "**Direct Lake has constraints Import mode doesn't.** Reading gold tables in place\nmeans the gold layer's physical shape directly determines dashboard performance\n— modeling mistakes surface as slow visuals rather than slow refreshes.\n\n**Schema drift from upstream feeds.** External commodity/market sources change\nshape without notice, and an append-only bronze layer means the drift lands\nintact and has to be absorbed in the bronze → silver transformation.\n\n**Deduplication across an append-only landing zone.** Because bronze never\noverwrites, silver carries the full burden of resolving duplicate and superseded\nrecords into a single consistent view.",
+          "score": 0.575
+        },
+        {
+          "sourceFile": "knowledge/projects/commodity-intelligence-platform.md",
+          "heading": "Architecture",
+          "text": "Five stages, implemented as a **Microsoft Fabric medallion architecture** with a\nDirect Lake reporting layer. These stage descriptions are migrated verbatim from\nthe interactive pipeline diagram on the previous site.\n\n**1. Raw Extraction** *(icon: Database)*\nRaw commodity and market data is pulled from source feeds into the pipeline,\nunchanged and untransformed — the entry point for everything downstream.\n\n**2. Bronze — Raw Ingest** *(icon: Layers)*\nExtracted data lands in the `bronze` layer exactly as received — a raw,\nappend-only landing zone that preserves the original records for lineage and\nreprocessing.\n\n**3. Silver — Cleansed** *(icon: Filter)*\nBronze records are cleaned, validated, and conformed into a consistent schema in\nthe `silver` layer, removing duplicates and standardizing formats.\n\n**4. Gold — Curated** *(icon: Gem)*\nSilver data is aggregated into business-ready tables in the `gold` layer — the\ncurated, query-optimized layer that reporting tools read from.\n\n**5. Direct Lake Dashboards** *(icon: LayoutDashboard, status: active)*\nPower BI queries the `gold` layer directly in `Direct Lake` mode — no import or\nscheduled refresh — so dashboards reflect near-real-time data for\ndecision-making.",
+          "score": 0.5183
+        },
+        {
+          "sourceFile": "knowledge/projects/commodity-intelligence-platform.md",
+          "heading": "Key decisions",
+          "text": "**Direct Lake instead of Import mode.** This is the decision that makes the\n\"near-real-time\" claim true rather than aspirational. Import mode would put a\nscheduled refresh between the gold layer and the dashboard; Direct Lake has\nPower BI read the gold tables in place, so there is no refresh window to fall\nbehind in.\n\n**Append-only bronze.** Landing data exactly as received — untransformed — costs\nstorage but buys lineage and full reprocessing. If a transformation rule turns\nout to be wrong, silver and gold can be rebuilt from bronze without going back\nto the source feeds.\n\n**Cleaning in silver, aggregation in gold.** Keeping deduplication and schema\nconformance separate from business aggregation means each layer has one job, and\na bad number can be traced to the layer that produced it.\n\n**Gold optimized for query, not for completeness.** The gold layer is shaped for\nwhat the dashboards ask, which is what allows Direct Lake to stay fast.",
+          "score": 0.4801
+        },
+        {
+          "sourceFile": "knowledge/projects/commodity-intelligence-platform.md",
+          "heading": "Overview",
+          "text": "An automated pipeline that extracts raw commodity/market data, processes it\nthrough a Microsoft Fabric medallion architecture (bronze → silver → gold), and\nsurfaces it in Direct Lake mode Power BI dashboards for near-real-time\ndecision-making.",
+          "score": 0.4788
+        },
+        {
+          "sourceFile": "knowledge/projects/commodity-intelligence-platform.md",
+          "heading": "Impact",
+          "text": "Delivered near-real-time commodity and market visibility to decision-makers by\nremoving the scheduled-refresh lag between the curated data layer and the\ndashboards reading it.",
+          "score": 0.3662
+        },
+        {
+          "sourceFile": "knowledge/projects/commodity-intelligence-platform.md",
+          "heading": "Problem",
+          "text": "Commodity and market data arrives continuously from external feeds, but the\ndecisions it should inform are time-sensitive. A traditional import-and-refresh\nBI setup puts a scheduled refresh between the data and the decision — the\ndashboard is always some hours behind reality, and the gap is invisible to\nwhoever is reading it.\n\nThe platform's job is to get raw market feeds into a trustworthy, query-ready\nshape and in front of decision-makers with as little latency as the reporting\nlayer allows.",
+          "score": 0.3098
+        }
+      ],
+      "tools": [
+        "getProject",
+        "getProject",
+        "getProject",
+        "getProject",
+        "getProject"
+      ],
+      "latencyMs": 43501,
+      "usage": {
+        "input": 3625,
+        "output": 633
+      },
+      "intent": "architecture_meta",
+      "entitySlug": "commodity-intelligence-platform",
+      "confidence": 0.9,
+      "error": "429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01m1vmpa2sedavc3mtzk0re8wf` service tier `on_demand` on tokens per minute (TPM): Limit 8000, Used 5144, Requested 3554. Please try again in 5.234999999s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}}",
+      "id": "commodity-03",
+      "question": "What is the bronze layer for in the commodity platform?",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/commodity-intelligence-platform.md",
+      "expectedSection": "Architecture",
+      "retrievalHit": true,
+      "sectionHit": true,
+      "behaviourPass": false,
+      "behaviourNote": "answer empty or too short",
+      "grounded": null,
+      "judgeVerdict": "SKIP",
+      "judgeReason": "no answer produced"
+    },
+    {
+      "answer": "Yes. Yash has experience integrating with SAP BW – he contributed to a “sap‑bw‑data‑integration” project that involved data‑engineering, ETL pipelines, a medallion architecture, and enterprise‑system integration (as shown in his skills overview) *(from `getSkillsOverview` JSON, SAP‑BW project listed under Data Engineering, ETL, Medallion Architecture, Enterprise System Integration)*.",
+      "chunks": [
+        {
+          "sourceFile": "knowledge/experience.md",
+          "heading": "Graduate Software Engineer Trainee",
+          "text": "**Employer:** Emerson\n**Dates:** \n**Location:** \n**Links:** —\n\n- Engineered ETL data migration pipelines across enterprise platforms using C#\n  and .NET, reducing manual errors by 60% and improving interoperability\n- Developed protocol-aware MODBUS and HART data conversion workflows,\n  maintaining 90%+ data integrity\n- Built an LLM-powered internal analytics assistant using Python and prompt\n  engineering, reducing enterprise knowledge retrieval time by 45%\n- Automated end-to-end data ingestion, model execution, and deployment using\n  REST APIs and Azure DevOps CI/CD pipelines\n- Implemented 15+ data validation rules through system log analysis to improve\n  data quality in production ML pipelines\n- Collaborated with cross-functional stakeholders to define KPIs and execute\n  150+ feature-level test scenarios aligned with business requirements\n\n**Stack:** C#, .NET, Python, REST APIs, Azure DevOps, MODBUS, HART, LLMs, prompt\nengineering",
+          "score": 0.2549
+        }
+      ],
+      "tools": [
+        "getSkillsOverview"
+      ],
+      "latencyMs": 2245,
+      "usage": {
+        "input": 3101,
+        "output": 420
+      },
+      "intent": "experience",
+      "confidence": 0.95,
+      "id": "sap-01",
+      "question": "Has he worked with SAP?",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/sap-bw-data-integration.md",
+      "retrievalHit": false,
+      "sectionHit": null,
+      "behaviourPass": true,
+      "behaviourNote": "answered",
+      "grounded": null,
+      "judgeVerdict": "PARSE_ERROR",
+      "judgeReason": ""
+    },
+    {
+      "answer": "",
+      "chunks": [
+        {
+          "sourceFile": "knowledge/projects/sap-bw-data-integration.md",
+          "heading": "Problem",
+          "text": "Enterprise reporting data doesn't only come from external feeds — a large share\nof it lives in SAP BW, behind its own extraction model and semantics. Standing\nup a separate pipeline for it would mean two sets of transformation rules, two\nplaces for a definition to drift, and two things to maintain.\n\nThe work here was to bring SAP BW in as *another source* on the existing\nmedallion pipeline rather than as a parallel system.",
+          "score": 0.7541
+        },
+        {
+          "sourceFile": "knowledge/projects/sap-bw-data-integration.md",
+          "heading": "Key decisions",
+          "text": "**One pipeline, many sources.** The defining decision: SAP BW is onboarded as a\nsource feed into the existing bronze layer rather than getting its own parallel\npipeline. Transformation logic, curation rules, and the reporting layer are\nshared, so a business definition lives in exactly one place.\n\n**Conform to the shared schema in silver.** SAP BW's native structures are\nabsorbed and aligned at the silver stage, which is what lets everything\ndownstream stay source-agnostic.\n\n**Bronze stays raw for SAP BW too.** The same append-only, unmodified landing\nrule applies, preserving the original extracts for lineage and reprocessing.",
+          "score": 0.7364
+        },
+        {
+          "sourceFile": "knowledge/projects/sap-bw-data-integration.md",
+          "heading": "Challenges",
+          "text": "**SAP BW's extraction model is its own discipline.** Getting data out of BW\nfaithfully — with its InfoProviders, hierarchies, and extractor semantics —\nis a different problem from reading a flat external feed, and the fidelity of\neverything downstream depends on it.\n\n**Conforming enterprise semantics into a shared schema.** SAP BW carries its own\nnaming and modeling conventions; reconciling them with the schema used by the\nplatform's other sources is the substance of the bronze → silver transformation.\n\n**Sharing a pipeline means shared blast radius.** The benefit of one medallion\npipeline is one set of rules; the cost is that a change made for SAP BW has to\nnot break the existing sources running through the same layers.",
+          "score": 0.7185
+        },
+        {
+          "sourceFile": "knowledge/projects/sap-bw-data-integration.md",
+          "heading": "Impact",
+          "text": "Brought an enterprise SAP BW source into the existing Fabric medallion pipeline\nwithout standing up a parallel stack, so downstream reporting consumes SAP BW\ndata through the same curated gold layer as every other source.",
+          "score": 0.6855
+        },
+        {
+          "sourceFile": "knowledge/projects/sap-bw-data-integration.md",
+          "heading": "Architecture",
+          "text": "Five stages sharing the same Fabric medallion pipeline used by the\n[Commodity Intelligence Platform](./commodity-intelligence-platform.md). These\nstage descriptions are migrated verbatim from the interactive pipeline diagram on\nthe previous site.\n\n**1. SAP BW Source** *(icon: Server)*\n`SAP BW` acts as the upstream enterprise source system, supplying the data this\npipeline extracts and feeds into the same Fabric-based medallion architecture\nused across the platform.\n\n**2. Bronze — Raw Ingest** *(icon: Layers)*\nData extracted from SAP BW lands in the `bronze` layer as raw, unmodified\nrecords — the same shared landing zone used by the platform's other source\nfeeds.\n\n**3. Silver — Transformed** *(icon: Filter)*\nRaw SAP BW extracts are transformed and conformed into a consistent schema in\nthe `silver` layer, aligning them with the rest of the medallion pipeline.\n\n**4. Gold — Curated** *(icon: Gem)*\nTransformed data is curated into business-ready tables in the `gold` layer, ready\nto feed downstream consumers.\n\n**5. Downstream Reporting** *(icon: BarChart3, status: active)*\nGold-layer data feeds downstream reporting — the same shared pipeline used by the\nplatform's other dashboards.",
+          "score": 0.658
+        },
+        {
+          "sourceFile": "knowledge/projects/sap-bw-data-integration.md",
+          "heading": "Overview",
+          "text": "Integrates SAP BW as a source system into the same Fabric-based pipeline,\nhandling extraction and transformation into the medallion layers feeding\ndownstream reporting.",
+          "score": 0.6555
+        }
+      ],
+      "tools": [
+        "getProject",
+        "getProject",
+        "getProject",
+        "getProject",
+        "getProject"
+      ],
+      "latencyMs": 34612,
+      "usage": {
+        "input": 3690,
+        "output": 534
+      },
+      "intent": "project_deep_dive",
+      "entitySlug": "sap-bw-data-integration",
+      "confidence": 0.9,
+      "error": "429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01m1vmpa2sedavc3mtzk0re8wf` service tier `on_demand` on tokens per minute (TPM): Limit 8000, Used 5058, Requested 3194. Please try again in 1.89s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}}",
+      "id": "sap-02",
+      "question": "Why was SAP BW added to the existing pipeline instead of building a separate one?",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/sap-bw-data-integration.md",
+      "expectedSection": "Key decisions",
+      "retrievalHit": true,
+      "sectionHit": true,
+      "behaviourPass": false,
+      "behaviourNote": "answer empty or too short",
+      "grounded": null,
+      "judgeVerdict": "SKIP",
+      "judgeReason": "no answer produced"
+    },
+    {
+      "answer": "**SupplySightAI – Agentic Supply Chain Intelligence**  \n\nYash built SupplySightAI to turn the flood of operational data that supply‑chain teams sit on into an *autonomous* analysis loop that surfaces ranked, explained actions instead of static dashboards.  \n\n**Problem** – Teams could only read a tiny slice of the data; the signals that matter (a slipping supplier, a degrading lane, a stock position about to go negative) were buried in tables and only noticed after a failure occurred. A dashboard merely shows what you already thought to ask for, not *why* a number moved, what will happen next, or which of the many emerging issues should be tackled first. *(from `knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md` § Problem)*  \n\n**What was built** – An agentic AI platform that automatically  \n* ingests supply‑chain data,  \n* detects risks,  \n* explains root causes,  \n* forecasts disruptions, and  \n* recommends a prioritized action list. *(from `knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md` § Overview)*  \n\n**Architecture** – The system is a **multi‑agent pipeline**:  \n\n| Agent | Role |\n|------|------|\n| **Analysis agent** | Loads data with **Pandas**, computes current state, deltas, and baseline anomalies. |\n| **Risk detection agent** | Flags data that crosses risk thresholds and names the risks. |\n| **Root cause agent** | Traces each flagged risk back through contributing dimensions to explain *why* it occurred. |\n| **Forecasting agent** | Projects disruptions forward using **scikit‑learn** models. |\n| **Recommendation agent** | Ranks all findings into a prioritized action list shown to the user. |\n\nThe front‑end is a lightweight **Streamlit** app that lets users drill from a recommendation back to the underlying evidence. *(from `knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md` § Architecture)*  \n\n**Key decisions**  \n\n* **Agents over a single prompt** – Splitting the workflow into narrow, checkable agents makes failures localizable and each stage easier to validate. *(from `knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md` § Decisions)*  \n* **Classical ML for the numbers, agents for the reasoning** – Anomaly detection and forecasting run on **scikit‑learn** and **Pandas**; the agent layer orchestrates and explains rather than performing arithmetic it can’t be held to. *(same source)*  \n* **Prioritized recommendations as a first‑class output** – The system returns a ranked list, not an unstructured set of risks, turning the output into actionable guidance. *(same source)*  \n* **Streamlit for the UI** – Chosen for a small surface area and fast iteration; the core value lies in the agent system, not the UI framework. *(same source)*  \n\n**Challenges faced**  \n\n* **Root‑cause analysis** is harder than detection; the explanation layer must separate true drivers from correlated by‑standers, because a confidently wrong root cause is worse than none. *(from `knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md` § Challenges)*  \n* **Keeping agents grounded** – Every claim must trace back to an actual data row; otherwise the explanation drifts into plausible‑sounding narrative. *(same source)*  \n* **Ranking incomparable risks** – Merging a forecast‑driven risk with a live anomaly requires a judgment‑call encoded in the system rather than derived directly from the data. *(same source)*  \n\n**Impact** – The platform shifts supply‑chain monitoring from a reactive, dashboard‑reading exercise to an autonomous loop that continuously surfaces ranked, explained actions, enabling teams to act before problems materialize. *(from `knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md` § Impact)*  ",
+      "chunks": [
+        {
+          "sourceFile": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+          "heading": "Problem",
+          "text": "Supply chain teams sit on more operational data than they can read. The signal\nthat matters — a supplier slipping, a lane degrading, a stock position about to\ngo negative — is buried in tables that only get looked at after something has\nalready broken. The usual answer is a dashboard, but a dashboard only shows you\nwhat you already thought to ask for. It doesn't tell you *why* a number moved,\nwhat's likely to happen next, or which of the fifteen things now on fire you\nshould handle first.\n\nSupplySightAI was built to close that gap: instead of a human driving the\nanalysis, agents drive it and hand the human a ranked set of actions.",
+          "score": 0.5888
+        },
+        {
+          "sourceFile": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+          "heading": "Overview",
+          "text": "Built an agentic AI platform that autonomously analyzes supply chain data,\ndetects risks, explains root causes, forecasts disruptions, and recommends\nprioritized actions.",
+          "score": 0.5781
+        },
+        {
+          "sourceFile": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+          "heading": "Impact",
+          "text": "The platform turns supply chain monitoring from a reactive dashboard-reading\nexercise into an autonomous analysis loop that surfaces ranked, explained\nactions.",
+          "score": 0.5433
+        },
+        {
+          "sourceFile": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+          "heading": "Architecture",
+          "text": "The system is organized as a **multi-agent pipeline**, where each agent owns one\nstage of the reasoning chain rather than one monolithic model trying to do\neverything:\n\n- **Analysis agent** — ingests supply chain data and computes the descriptive\n  layer using Pandas: current state, deltas, and anomalies against baseline.\n- **Risk detection agent** — flags where the data crosses into risk territory,\n  turning raw anomalies into named risks.\n- **Root cause agent** — explains *why* a flagged risk appeared, tracing it back\n  through the contributing dimensions rather than just reporting the symptom.\n- **Forecasting agent** — projects disruption forward using scikit-learn models,\n  so the output is anticipatory rather than purely retrospective.\n- **Recommendation agent** — ranks the resulting findings into a prioritized\n  action list, which is what the user actually sees first.\n\n**Streamlit** is the delivery layer: it hosts the interactive front end where a\nuser inspects the agents' findings and drills from the recommendation back down\nto the evidence.",
+          "score": 0.4944
+        },
+        {
+          "sourceFile": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+          "heading": "Key decisions",
+          "text": "**Agents over a single prompt.** Splitting analysis, risk, root cause,\nforecasting, and recommendation into separate agents means each stage has a\nnarrow, checkable job. It also means a failure is localizable — a bad\nrecommendation can be traced to the specific upstream agent that produced the\nfaulty input.\n\n**Classical ML for the numbers, agents for the reasoning.** Forecasting and\nanomaly detection run on scikit-learn and Pandas rather than being asked of a\nlanguage model. The agentic layer orchestrates and explains; it doesn't do\narithmetic it can't be held to.\n\n**Recommendations must be prioritized, not just produced.** An unranked list of\ntwelve risks is the same problem as the original dashboard. Ranking is treated\nas a first-class output, not a presentation detail.\n\n**Streamlit for the interface.** Chosen to keep the surface area small and the\niteration loop fast — the interesting work is the agent system, not the UI\nframework.",
+          "score": 0.491
+        },
+        {
+          "sourceFile": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+          "heading": "Challenges",
+          "text": "**Root cause is harder than detection.** Detecting that a metric moved is\nmechanical; attributing it correctly is not. The explanation layer has to\ndistinguish a genuine driver from a correlated bystander, and a confidently\nwrong root cause is worse than no root cause at all.\n\n**Keeping agents grounded in the data.** Every claim an agent makes has to trace\nback to a row it actually read. Without that constraint, an explanation layer\ndrifts into plausible-sounding narrative.\n\n**Ranking across incomparable risks.** Prioritization requires putting a\nforecast-driven risk and a currently-live anomaly on the same scale, which is a\njudgment call encoded in the system rather than something the data hands you.",
+          "score": 0.4151
+        }
+      ],
+      "tools": [
+        "getProject"
+      ],
+      "latencyMs": 4009,
+      "usage": {
+        "input": 3952,
+        "output": 1168
+      },
+      "intent": "project_deep_dive",
+      "entitySlug": "supplysightai-agentic-supply-chain-intelligence",
+      "confidence": 0.95,
+      "id": "supplysight-01",
+      "question": "Tell me about SupplySightAI",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+      "retrievalHit": true,
+      "sectionHit": null,
+      "behaviourPass": true,
+      "behaviourNote": "answered",
+      "grounded": false,
+      "judgeVerdict": "NO",
+      "judgeReason": "The claim that Yash built SupplySightAI is not supported by the provided context."
+    },
+    {
+      "answer": "SupplySightAI split the workflow into a set of specialized agents rather than relying on a single prompt‑driven model. By giving each stage — analysis, risk detection, root‑cause explanation, forecasting, and recommendation — its own agent, the system keeps every job narrow and verifiable, and any error can be traced back to the specific upstream agent that produced it. This modular approach avoids the brittleness of a monolithic prompt and makes the overall pipeline more reliable and debuggable. *(from the “Key decisions” section of the SupplySightAI project documentation)*",
+      "chunks": [
+        {
+          "sourceFile": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+          "heading": "Overview",
+          "text": "Built an agentic AI platform that autonomously analyzes supply chain data,\ndetects risks, explains root causes, forecasts disruptions, and recommends\nprioritized actions.",
+          "score": 0.5962
+        },
+        {
+          "sourceFile": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+          "heading": "Problem",
+          "text": "Supply chain teams sit on more operational data than they can read. The signal\nthat matters — a supplier slipping, a lane degrading, a stock position about to\ngo negative — is buried in tables that only get looked at after something has\nalready broken. The usual answer is a dashboard, but a dashboard only shows you\nwhat you already thought to ask for. It doesn't tell you *why* a number moved,\nwhat's likely to happen next, or which of the fifteen things now on fire you\nshould handle first.\n\nSupplySightAI was built to close that gap: instead of a human driving the\nanalysis, agents drive it and hand the human a ranked set of actions.",
+          "score": 0.5643
+        },
+        {
+          "sourceFile": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+          "heading": "Architecture",
+          "text": "The system is organized as a **multi-agent pipeline**, where each agent owns one\nstage of the reasoning chain rather than one monolithic model trying to do\neverything:\n\n- **Analysis agent** — ingests supply chain data and computes the descriptive\n  layer using Pandas: current state, deltas, and anomalies against baseline.\n- **Risk detection agent** — flags where the data crosses into risk territory,\n  turning raw anomalies into named risks.\n- **Root cause agent** — explains *why* a flagged risk appeared, tracing it back\n  through the contributing dimensions rather than just reporting the symptom.\n- **Forecasting agent** — projects disruption forward using scikit-learn models,\n  so the output is anticipatory rather than purely retrospective.\n- **Recommendation agent** — ranks the resulting findings into a prioritized\n  action list, which is what the user actually sees first.\n\n**Streamlit** is the delivery layer: it hosts the interactive front end where a\nuser inspects the agents' findings and drills from the recommendation back down\nto the evidence.",
+          "score": 0.5318
+        },
+        {
+          "sourceFile": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+          "heading": "Impact",
+          "text": "The platform turns supply chain monitoring from a reactive dashboard-reading\nexercise into an autonomous analysis loop that surfaces ranked, explained\nactions.",
+          "score": 0.5236
+        },
+        {
+          "sourceFile": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+          "heading": "Key decisions",
+          "text": "**Agents over a single prompt.** Splitting analysis, risk, root cause,\nforecasting, and recommendation into separate agents means each stage has a\nnarrow, checkable job. It also means a failure is localizable — a bad\nrecommendation can be traced to the specific upstream agent that produced the\nfaulty input.\n\n**Classical ML for the numbers, agents for the reasoning.** Forecasting and\nanomaly detection run on scikit-learn and Pandas rather than being asked of a\nlanguage model. The agentic layer orchestrates and explains; it doesn't do\narithmetic it can't be held to.\n\n**Recommendations must be prioritized, not just produced.** An unranked list of\ntwelve risks is the same problem as the original dashboard. Ranking is treated\nas a first-class output, not a presentation detail.\n\n**Streamlit for the interface.** Chosen to keep the surface area small and the\niteration loop fast — the interesting work is the agent system, not the UI\nframework.",
+          "score": 0.5105
+        },
+        {
+          "sourceFile": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+          "heading": "Challenges",
+          "text": "**Root cause is harder than detection.** Detecting that a metric moved is\nmechanical; attributing it correctly is not. The explanation layer has to\ndistinguish a genuine driver from a correlated bystander, and a confidently\nwrong root cause is worse than no root cause at all.\n\n**Keeping agents grounded in the data.** Every claim an agent makes has to trace\nback to a row it actually read. Without that constraint, an explanation layer\ndrifts into plausible-sounding narrative.\n\n**Ranking across incomparable risks.** Prioritization requires putting a\nforecast-driven risk and a currently-live anomaly on the same scale, which is a\njudgment call encoded in the system rather than something the data hands you.",
+          "score": 0.4639
+        }
+      ],
+      "tools": [
+        "getProject",
+        "getProject"
+      ],
+      "latencyMs": 32486,
+      "usage": {
+        "input": 4770,
+        "output": 565
+      },
+      "intent": "architecture_meta",
+      "entitySlug": "supplysightai-agentic-supply-chain-intelligence",
+      "confidence": 0.95,
+      "id": "supplysight-02",
+      "question": "Why did SupplySightAI use multiple agents instead of one prompt?",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+      "expectedSection": "Key decisions",
+      "retrievalHit": true,
+      "sectionHit": true,
+      "behaviourPass": true,
+      "behaviourNote": "answered",
+      "grounded": null,
+      "judgeVerdict": "PARSE_ERROR",
+      "judgeReason": ""
+    },
+    {
+      "answer": "",
+      "chunks": [
+        {
+          "sourceFile": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+          "heading": "Overview",
+          "text": "Built an agentic AI platform that autonomously analyzes supply chain data,\ndetects risks, explains root causes, forecasts disruptions, and recommends\nprioritized actions.",
+          "score": 0.5451
+        },
+        {
+          "sourceFile": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+          "heading": "Impact",
+          "text": "The platform turns supply chain monitoring from a reactive dashboard-reading\nexercise into an autonomous analysis loop that surfaces ranked, explained\nactions.",
+          "score": 0.5175
+        },
+        {
+          "sourceFile": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+          "heading": "Problem",
+          "text": "Supply chain teams sit on more operational data than they can read. The signal\nthat matters — a supplier slipping, a lane degrading, a stock position about to\ngo negative — is buried in tables that only get looked at after something has\nalready broken. The usual answer is a dashboard, but a dashboard only shows you\nwhat you already thought to ask for. It doesn't tell you *why* a number moved,\nwhat's likely to happen next, or which of the fifteen things now on fire you\nshould handle first.\n\nSupplySightAI was built to close that gap: instead of a human driving the\nanalysis, agents drive it and hand the human a ranked set of actions.",
+          "score": 0.4751
+        },
+        {
+          "sourceFile": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+          "heading": "Architecture",
+          "text": "The system is organized as a **multi-agent pipeline**, where each agent owns one\nstage of the reasoning chain rather than one monolithic model trying to do\neverything:\n\n- **Analysis agent** — ingests supply chain data and computes the descriptive\n  layer using Pandas: current state, deltas, and anomalies against baseline.\n- **Risk detection agent** — flags where the data crosses into risk territory,\n  turning raw anomalies into named risks.\n- **Root cause agent** — explains *why* a flagged risk appeared, tracing it back\n  through the contributing dimensions rather than just reporting the symptom.\n- **Forecasting agent** — projects disruption forward using scikit-learn models,\n  so the output is anticipatory rather than purely retrospective.\n- **Recommendation agent** — ranks the resulting findings into a prioritized\n  action list, which is what the user actually sees first.\n\n**Streamlit** is the delivery layer: it hosts the interactive front end where a\nuser inspects the agents' findings and drills from the recommendation back down\nto the evidence.",
+          "score": 0.4687
+        },
+        {
+          "sourceFile": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+          "heading": "Challenges",
+          "text": "**Root cause is harder than detection.** Detecting that a metric moved is\nmechanical; attributing it correctly is not. The explanation layer has to\ndistinguish a genuine driver from a correlated bystander, and a confidently\nwrong root cause is worse than no root cause at all.\n\n**Keeping agents grounded in the data.** Every claim an agent makes has to trace\nback to a row it actually read. Without that constraint, an explanation layer\ndrifts into plausible-sounding narrative.\n\n**Ranking across incomparable risks.** Prioritization requires putting a\nforecast-driven risk and a currently-live anomaly on the same scale, which is a\njudgment call encoded in the system rather than something the data hands you.",
+          "score": 0.4662
+        },
+        {
+          "sourceFile": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+          "heading": "Key decisions",
+          "text": "**Agents over a single prompt.** Splitting analysis, risk, root cause,\nforecasting, and recommendation into separate agents means each stage has a\nnarrow, checkable job. It also means a failure is localizable — a bad\nrecommendation can be traced to the specific upstream agent that produced the\nfaulty input.\n\n**Classical ML for the numbers, agents for the reasoning.** Forecasting and\nanomaly detection run on scikit-learn and Pandas rather than being asked of a\nlanguage model. The agentic layer orchestrates and explains; it doesn't do\narithmetic it can't be held to.\n\n**Recommendations must be prioritized, not just produced.** An unranked list of\ntwelve risks is the same problem as the original dashboard. Ranking is treated\nas a first-class output, not a presentation detail.\n\n**Streamlit for the interface.** Chosen to keep the surface area small and the\niteration loop fast — the interesting work is the agent system, not the UI\nframework.",
+          "score": 0.4633
+        }
+      ],
+      "tools": [],
+      "latencyMs": 40817,
+      "usage": {
+        "input": 0,
+        "output": 0
+      },
+      "intent": "architecture_meta",
+      "entitySlug": "supplysightai-agentic-supply-chain-intelligence",
+      "confidence": 0.9,
+      "error": "429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01m1vmpa2sedavc3mtzk0re8wf` service tier `on_demand` on tokens per minute (TPM): Limit 8000, Used 6134, Requested 2586. Please try again in 5.399999999s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}}",
+      "id": "supplysight-03",
+      "question": "What was hard about building the supply chain agent system?",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+      "expectedSection": "Challenges",
+      "retrievalHit": true,
+      "sectionHit": true,
+      "behaviourPass": false,
+      "behaviourNote": "answer empty or too short",
+      "grounded": null,
+      "judgeVerdict": "SKIP",
+      "judgeReason": "no answer produced"
+    },
+    {
+      "answer": "ParcelPal’s routing engine uses **Dijkstra’s Algorithm** to compute the shortest‑path routes across the delivery network. *(from `knowledge/projects/parcelpal-route-optimization.md` – Overview / Decisions sections)*",
+      "chunks": [
+        {
+          "sourceFile": "knowledge/projects/parcelpal-route-optimization.md",
+          "heading": "Problem",
+          "text": "Delivery routing done by hand — or by \"whatever order the addresses came in\" —\nburns time and fuel on paths nobody chose deliberately. For a small delivery\noperation, the cost shows up as longer routes, more driver hours, and higher\nper-parcel operating cost, all of which are avoidable with a proper shortest-path\ncomputation over the delivery network.\n\nParcelPal exists to compute those routes automatically and expose them through\nan interface a dispatcher can actually use.",
+          "score": 0.7857
+        },
+        {
+          "sourceFile": "knowledge/projects/parcelpal-route-optimization.md",
+          "heading": "Overview",
+          "text": "Built a delivery route optimizer with Dijkstra's Algorithm, improving efficiency\nand reducing operational costs.",
+          "score": 0.7207
+        },
+        {
+          "sourceFile": "knowledge/projects/parcelpal-route-optimization.md",
+          "heading": "Challenges",
+          "text": "**Modeling the delivery network as a graph.** The real work in a Dijkstra-based\noptimizer isn't the algorithm — it's deciding what the nodes and edge weights\nactually are (distance? time? cost?) so that \"shortest\" means the thing the\nbusiness cares about.\n\n**Keeping the graph and the stored data in sync.** Route data lives in MongoDB\nand has to be projected into a graph structure on each computation, which\nconstrains how large the network can get before the projection itself becomes\nthe bottleneck.",
+          "score": 0.667
+        },
+        {
+          "sourceFile": "knowledge/projects/parcelpal-route-optimization.md",
+          "heading": "Architecture",
+          "text": "A conventional **MERN-shaped full-stack application** with the optimization\nlogic on the server:\n\n- **React front end** — where routes are entered, computed, and displayed.\n- **Node.js + Express API** — the REST layer between the client and the routing\n  engine, exposing route-computation and data endpoints.\n- **Dijkstra's Algorithm** on the server — the delivery network is modeled as a\n  weighted graph, and shortest paths are computed across it to produce the\n  optimized route.\n- **MongoDB** — persistence for the delivery/route data the graph is built from.",
+          "score": 0.6574
+        },
+        {
+          "sourceFile": "knowledge/projects/parcelpal-route-optimization.md",
+          "heading": "Impact",
+          "text": "Improved delivery efficiency and reduced operational costs by replacing manual\nroute selection with computed shortest paths.",
+          "score": 0.6264
+        },
+        {
+          "sourceFile": "knowledge/projects/parcelpal-route-optimization.md",
+          "heading": "Key decisions",
+          "text": "**Dijkstra rather than a heuristic solver.** For a weighted, non-negative\ndelivery graph, Dijkstra gives a provably optimal shortest path without the\ntuning burden of a metaheuristic. The correctness guarantee was worth more than\nthe extra flexibility of an approximate optimizer at this scale.\n\n**Routing on the server, not the client.** Keeping the graph and the algorithm\nbehind the REST API means the client stays thin and the optimization logic can\nchange without shipping a new front end.\n\n**MongoDB for the data layer.** A document store fits delivery records that vary\nin shape better than a rigid relational schema for a project at this size.",
+          "score": 0.5585
+        }
+      ],
+      "tools": [
+        "getProject"
+      ],
+      "latencyMs": 1793,
+      "usage": {
+        "input": 3290,
+        "output": 228
+      },
+      "intent": "architecture_meta",
+      "entitySlug": "parcelpal-route-optimization",
+      "confidence": 0.95,
+      "id": "parcelpal-01",
+      "question": "What algorithm did ParcelPal use for routing?",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/parcelpal-route-optimization.md",
+      "retrievalHit": true,
+      "sectionHit": null,
+      "behaviourPass": true,
+      "behaviourNote": "answered",
+      "grounded": true,
+      "judgeVerdict": "YES",
+      "judgeReason": "All claims in the answer are directly supported by the provided context."
+    },
+    {
+      "answer": "ParcelPal was built as a **MERN‑shaped full‑stack application**. The front end uses **React** (JavaScript), the back end runs **Node.js** with **Express** to expose a REST API, and **MongoDB** stores the delivery‑route data. Overall the stack is JavaScript → React → Node.js/Express → MongoDB (REST APIs). *(from `knowledge/projects/parcelpal-route-optimization.md` – Architecture section and stack list)*",
+      "chunks": [
+        {
+          "sourceFile": "knowledge/projects/parcelpal-route-optimization.md",
+          "heading": "Problem",
+          "text": "Delivery routing done by hand — or by \"whatever order the addresses came in\" —\nburns time and fuel on paths nobody chose deliberately. For a small delivery\noperation, the cost shows up as longer routes, more driver hours, and higher\nper-parcel operating cost, all of which are avoidable with a proper shortest-path\ncomputation over the delivery network.\n\nParcelPal exists to compute those routes automatically and expose them through\nan interface a dispatcher can actually use.",
+          "score": 0.5579
+        },
+        {
+          "sourceFile": "knowledge/projects/parcelpal-route-optimization.md",
+          "heading": "Architecture",
+          "text": "A conventional **MERN-shaped full-stack application** with the optimization\nlogic on the server:\n\n- **React front end** — where routes are entered, computed, and displayed.\n- **Node.js + Express API** — the REST layer between the client and the routing\n  engine, exposing route-computation and data endpoints.\n- **Dijkstra's Algorithm** on the server — the delivery network is modeled as a\n  weighted graph, and shortest paths are computed across it to produce the\n  optimized route.\n- **MongoDB** — persistence for the delivery/route data the graph is built from.",
+          "score": 0.4822
+        },
+        {
+          "sourceFile": "knowledge/projects/parcelpal-route-optimization.md",
+          "heading": "Overview",
+          "text": "Built a delivery route optimizer with Dijkstra's Algorithm, improving efficiency\nand reducing operational costs.",
+          "score": 0.4552
+        },
+        {
+          "sourceFile": "knowledge/projects/parcelpal-route-optimization.md",
+          "heading": "Challenges",
+          "text": "**Modeling the delivery network as a graph.** The real work in a Dijkstra-based\noptimizer isn't the algorithm — it's deciding what the nodes and edge weights\nactually are (distance? time? cost?) so that \"shortest\" means the thing the\nbusiness cares about.\n\n**Keeping the graph and the stored data in sync.** Route data lives in MongoDB\nand has to be projected into a graph structure on each computation, which\nconstrains how large the network can get before the projection itself becomes\nthe bottleneck.",
+          "score": 0.3974
+        },
+        {
+          "sourceFile": "knowledge/projects/parcelpal-route-optimization.md",
+          "heading": "Key decisions",
+          "text": "**Dijkstra rather than a heuristic solver.** For a weighted, non-negative\ndelivery graph, Dijkstra gives a provably optimal shortest path without the\ntuning burden of a metaheuristic. The correctness guarantee was worth more than\nthe extra flexibility of an approximate optimizer at this scale.\n\n**Routing on the server, not the client.** Keeping the graph and the algorithm\nbehind the REST API means the client stays thin and the optimization logic can\nchange without shipping a new front end.\n\n**MongoDB for the data layer.** A document store fits delivery records that vary\nin shape better than a rigid relational schema for a project at this size.",
+          "score": 0.3831
+        },
+        {
+          "sourceFile": "knowledge/projects/parcelpal-route-optimization.md",
+          "heading": "Impact",
+          "text": "Improved delivery efficiency and reduced operational costs by replacing manual\nroute selection with computed shortest paths.",
+          "score": 0.3796
+        }
+      ],
+      "tools": [
+        "getProject",
+        "getProject",
+        "getProject",
+        "getProject"
+      ],
+      "latencyMs": 27463,
+      "usage": {
+        "input": 5529,
+        "output": 717
+      },
+      "intent": "skills_query",
+      "entitySlug": "parcelpal-route-optimization",
+      "confidence": 0.95,
+      "id": "parcelpal-02",
+      "question": "What stack was ParcelPal built on?",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/parcelpal-route-optimization.md",
+      "retrievalHit": true,
+      "sectionHit": null,
+      "behaviourPass": true,
+      "behaviourNote": "answered",
+      "grounded": true,
+      "judgeVerdict": "YES",
+      "judgeReason": "All factual claims in the answer are directly supported by the provided context."
+    },
+    {
+      "answer": "",
+      "chunks": [
+        {
+          "sourceFile": "knowledge/projects/customer-segmentation-churn-prediction.md",
+          "heading": "Challenges",
+          "text": "**Class imbalance.** Churners are the minority class in most retention datasets,\nwhich makes naive accuracy misleading and forces careful choice of evaluation\nmetric and sampling strategy.\n\n**Defining churn.** \"Churned\" is a business definition, not a data one — the\nwindow and the threshold have to be chosen before any model can be trained, and\nthe choice materially changes the label distribution.\n\n**Making segments actionable.** Clusters that are statistically clean but don't\nmap to anything the retention team can actually do are a dead end; the\nsegmentation had to be legible as well as separable.",
+          "score": 0.6781
+        },
+        {
+          "sourceFile": "knowledge/projects/customer-segmentation-churn-prediction.md",
+          "heading": "Problem",
+          "text": "Retention spend is usually distributed by intuition: everyone who \"looks at\nrisk\" gets the same offer, and the team finds out months later whether it\nworked. With 100K+ customer records of behavioral data available, the better\nquestion is which customers are actually likely to churn, which behavioral\npatterns separate them, and what the appropriate next action is for each\nsegment — rather than one blanket campaign.",
+          "score": 0.6089
+        },
+        {
+          "sourceFile": "knowledge/projects/customer-segmentation-churn-prediction.md",
+          "heading": "Impact",
+          "text": "Improved targeted retention by **12%**, driven by replacing untargeted retention\noutreach with segment-aware, risk-scored next-best-action recommendations across\na base of **100K+ customer records**.",
+          "score": 0.5864
+        },
+        {
+          "sourceFile": "knowledge/projects/customer-segmentation-churn-prediction.md",
+          "heading": "Architecture",
+          "text": "A two-stage modeling pipeline over behavioral customer data:\n\n- **EDA layer** — exploratory analysis over 100K+ customer records in Pandas and\n  NumPy to establish the behavioral features that actually separate retained\n  from churned customers.\n- **Clustering / segmentation** — unsupervised grouping of customers into\n  behavioral segments, so downstream actions can be tailored per segment rather\n  than per individual.\n- **Churn classification** — supervised scikit-learn classifiers producing a\n  churn-risk score per customer.\n- **Next-best-action layer** — the segment and the risk score combine into a\n  recommended retention action, which is what drives the targeting.",
+          "score": 0.579
+        },
+        {
+          "sourceFile": "knowledge/projects/customer-segmentation-churn-prediction.md",
+          "heading": "Overview",
+          "text": "Developed predictive models using EDA and behavioral analytics on 100K+ customer\nrecords to identify churn risk and enable next-best-action recommendations,\nimproving targeted retention by 12%.",
+          "score": 0.5722
+        },
+        {
+          "sourceFile": "knowledge/projects/customer-segmentation-churn-prediction.md",
+          "heading": "Key decisions",
+          "text": "**Segment first, then score.** Clustering before classification means the churn\nsignal is interpreted in context — a drop in activity means something different\nfor a high-frequency segment than for an occasional one.\n\n**Behavioral features over demographic ones.** The analysis leans on what\ncustomers *do* rather than who they are, which generalizes better and is more\nactionable for retention.\n\n**Ship a next-best-action, not a risk score.** A probability column doesn't\nchange anyone's behavior. Mapping score plus segment onto a concrete recommended\naction is what made the model usable for targeting.",
+          "score": 0.5544
+        }
+      ],
+      "tools": [
+        "getProject",
+        "getProject",
+        "getProject"
+      ],
+      "latencyMs": 93450,
+      "usage": {
+        "input": 2328,
+        "output": 418
+      },
+      "intent": "project_deep_dive",
+      "entitySlug": "customer-segmentation-churn-prediction",
+      "confidence": 0.95,
+      "error": "429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01m1vmpa2sedavc3mtzk0re8wf` service tier `on_demand` on tokens per minute (TPM): Limit 8000, Used 7866, Requested 2161. Please try again in 15.2025s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}}",
+      "id": "churn-01",
+      "question": "What results did the churn prediction project achieve?",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/customer-segmentation-churn-prediction.md",
+      "expectedSection": "Impact",
+      "retrievalHit": true,
+      "sectionHit": true,
+      "behaviourPass": false,
+      "behaviourNote": "answer empty or too short",
+      "grounded": null,
+      "judgeVerdict": "SKIP",
+      "judgeReason": "no answer produced"
+    },
+    {
+      "answer": "",
+      "chunks": [
+        {
+          "sourceFile": "knowledge/projects/customer-segmentation-churn-prediction.md",
+          "heading": "Challenges",
+          "text": "**Class imbalance.** Churners are the minority class in most retention datasets,\nwhich makes naive accuracy misleading and forces careful choice of evaluation\nmetric and sampling strategy.\n\n**Defining churn.** \"Churned\" is a business definition, not a data one — the\nwindow and the threshold have to be chosen before any model can be trained, and\nthe choice materially changes the label distribution.\n\n**Making segments actionable.** Clusters that are statistically clean but don't\nmap to anything the retention team can actually do are a dead end; the\nsegmentation had to be legible as well as separable.",
+          "score": 0.6307
+        },
+        {
+          "sourceFile": "knowledge/projects/customer-segmentation-churn-prediction.md",
+          "heading": "Key decisions",
+          "text": "**Segment first, then score.** Clustering before classification means the churn\nsignal is interpreted in context — a drop in activity means something different\nfor a high-frequency segment than for an occasional one.\n\n**Behavioral features over demographic ones.** The analysis leans on what\ncustomers *do* rather than who they are, which generalizes better and is more\nactionable for retention.\n\n**Ship a next-best-action, not a risk score.** A probability column doesn't\nchange anyone's behavior. Mapping score plus segment onto a concrete recommended\naction is what made the model usable for targeting.",
+          "score": 0.5774
+        },
+        {
+          "sourceFile": "knowledge/projects/customer-segmentation-churn-prediction.md",
+          "heading": "Problem",
+          "text": "Retention spend is usually distributed by intuition: everyone who \"looks at\nrisk\" gets the same offer, and the team finds out months later whether it\nworked. With 100K+ customer records of behavioral data available, the better\nquestion is which customers are actually likely to churn, which behavioral\npatterns separate them, and what the appropriate next action is for each\nsegment — rather than one blanket campaign.",
+          "score": 0.573
+        },
+        {
+          "sourceFile": "knowledge/projects/customer-segmentation-churn-prediction.md",
+          "heading": "Impact",
+          "text": "Improved targeted retention by **12%**, driven by replacing untargeted retention\noutreach with segment-aware, risk-scored next-best-action recommendations across\na base of **100K+ customer records**.",
+          "score": 0.5414
+        },
+        {
+          "sourceFile": "knowledge/projects/customer-segmentation-churn-prediction.md",
+          "heading": "Architecture",
+          "text": "A two-stage modeling pipeline over behavioral customer data:\n\n- **EDA layer** — exploratory analysis over 100K+ customer records in Pandas and\n  NumPy to establish the behavioral features that actually separate retained\n  from churned customers.\n- **Clustering / segmentation** — unsupervised grouping of customers into\n  behavioral segments, so downstream actions can be tailored per segment rather\n  than per individual.\n- **Churn classification** — supervised scikit-learn classifiers producing a\n  churn-risk score per customer.\n- **Next-best-action layer** — the segment and the risk score combine into a\n  recommended retention action, which is what drives the targeting.",
+          "score": 0.5303
+        },
+        {
+          "sourceFile": "knowledge/projects/customer-segmentation-churn-prediction.md",
+          "heading": "Overview",
+          "text": "Developed predictive models using EDA and behavioral analytics on 100K+ customer\nrecords to identify churn risk and enable next-best-action recommendations,\nimproving targeted retention by 12%.",
+          "score": 0.5091
+        }
+      ],
+      "tools": [
+        "getProject",
+        "getProject",
+        "getProject",
+        "getProject",
+        "getProject"
+      ],
+      "latencyMs": 33336,
+      "usage": {
+        "input": 3870,
+        "output": 537
+      },
+      "intent": "project_deep_dive",
+      "entitySlug": "customer-segmentation-churn-prediction",
+      "confidence": 0.95,
+      "error": "429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01m1vmpa2sedavc3mtzk0re8wf` service tier `on_demand` on tokens per minute (TPM): Limit 8000, Used 5461, Requested 2935. Please try again in 2.97s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}}",
+      "id": "churn-02",
+      "question": "How did he approach customer segmentation?",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/customer-segmentation-churn-prediction.md",
+      "retrievalHit": true,
+      "sectionHit": null,
+      "behaviourPass": false,
+      "behaviourNote": "answer empty or too short",
+      "grounded": null,
+      "judgeVerdict": "SKIP",
+      "judgeReason": "no answer produced"
+    },
+    {
+      "answer": "Yash built an **uplift‑based targeting system** that treats causal inference as the core of the solution.  \n\n*Problem* – Traditional propensity models answer “who is likely to convert,” which often flags users who would convert anyway. Yash’s system instead asks the causal question “who converts **because** of the treatment,” so the budget can be spent on truly incremental impact. *(from `ai-causal-intelligence-system.md` § Problem)*  \n\n*Key decisions* –  \n1. **Model uplift, not propensity** – the pipeline estimates the incremental effect of a treatment rather than raw conversion probability.  \n2. **Use simulated A/B data** – 100 K+ users with known treatment/control outcomes provide a ground‑truth substrate for training and evaluation.  \n3. **Allocate at the segment level** – per‑user uplift estimates are noisy, so users are grouped into high‑uplift segments for stable budget decisions. *(from `ai-causal-intelligence-system.md` § Decisions)*  \n\n*Architecture* – The end‑to‑end flow consists of:  \n- An **A/B simulation data layer** (treatment and control outcomes for >100 K users).  \n- **Uplift / causal inference models** built with scikit‑learn that predict the incremental effect per user.  \n- **Segment identification** that clusters users by estimated uplift, separating genuinely persuadable groups from those who convert regardless or react negatively.  \n- A **budget allocation layer** that directs spend toward the high‑uplift segments. *(from `ai-causal-intelligence-system.md` § Architecture)*  \n\n*Challenges* – Uplift is unobservable at the individual level, the signal is low‑noise relative to baseline conversion variance, and standard classification metrics don’t apply, requiring uplift‑specific evaluation. *(from `ai-causal-intelligence-system.md` § Challenges)*  \n\n*Impact* – In simulation, reallocating budget to the identified high‑uplift segments generated **$684 K+** of incremental revenue from the 100 K+ user dataset. The figure is explicitly a simulated outcome, not a realized business result. *(from `ai-causal-intelligence-system.md` § Impact)*  ",
+      "chunks": [
+        {
+          "sourceFile": "knowledge/projects/ai-causal-intelligence-system.md",
+          "heading": "Problem",
+          "text": "Most targeting models answer the wrong question. A propensity model tells you\nwho is likely to convert — but a large share of those people would have\nconverted anyway, so spending budget on them buys nothing. The question that\nactually determines ROI is *who converts **because** of the treatment*, which is\na causal question, not a predictive one.\n\nThis system was built to answer that: estimate per-segment uplift from A/B data\nand allocate budget against incremental impact rather than raw likelihood.",
+          "score": 0.3658
+        },
+        {
+          "sourceFile": "knowledge/projects/ai-causal-intelligence-system.md",
+          "heading": "Key decisions",
+          "text": "**Uplift over propensity.** The central decision of the project: model the\n*incremental* effect of treatment, not the probability of conversion. This is\nwhat makes the budget allocation defensible.\n\n**Simulated A/B data as the substrate.** Working from A/B simulation data means\nthe ground-truth treatment effect is knowable, so the uplift estimator can be\nevaluated against something rather than assumed correct — which is the hard part\nof causal work on observational data.\n\n**Allocate at the segment level.** Per-user uplift estimates are noisy;\naggregating into segments makes the allocation stable and gives the business a\nunit it can act on.",
+          "score": 0.3636
+        },
+        {
+          "sourceFile": "knowledge/projects/ai-causal-intelligence-system.md",
+          "heading": "Overview",
+          "text": "Built an uplift-based targeting system using causal inference on 100K+ user A/B\nsimulation data to identify high-impact segments and optimize budget allocation,\nsimulating $684K+ incremental revenue.",
+          "score": 0.3568
+        },
+        {
+          "sourceFile": "knowledge/projects/ai-causal-intelligence-system.md",
+          "heading": "Architecture",
+          "text": "An uplift-modeling pipeline over 100K+ users of A/B simulation data:\n\n- **A/B simulation data layer** — treatment and control outcomes across 100K+\n  users, forming the basis for causal estimation.\n- **Uplift / causal inference models** — scikit-learn models estimating the\n  incremental effect of treatment per user rather than the raw conversion\n  probability.\n- **Segment identification** — users grouped by estimated uplift, separating\n  genuinely persuadable segments from those who convert regardless (or who react\n  negatively to treatment).\n- **Budget allocation layer** — spend directed toward high-uplift segments,\n  producing the simulated incremental revenue figure.",
+          "score": 0.3548
+        },
+        {
+          "sourceFile": "knowledge/projects/ai-causal-intelligence-system.md",
+          "heading": "Impact",
+          "text": "Simulated **$684K+ incremental revenue** by reallocating budget toward\nhigh-uplift segments identified from **100K+ user A/B simulation data**.\n\nNote that this figure is a **simulated** outcome from the A/B simulation dataset,\nnot a realized business result — it should always be described that way.",
+          "score": 0.3357
+        }
+      ],
+      "tools": [
+        "getProject"
+      ],
+      "latencyMs": 2473,
+      "usage": {
+        "input": 3332,
+        "output": 699
+      },
+      "intent": "project_deep_dive",
+      "entitySlug": "ai-causal-intelligence-system",
+      "confidence": 0.9,
+      "id": "causal-01",
+      "question": "Tell me about the causal inference work",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/ai-causal-intelligence-system.md",
+      "retrievalHit": true,
+      "sectionHit": null,
+      "behaviourPass": true,
+      "behaviourNote": "answered",
+      "grounded": false,
+      "judgeVerdict": "NO",
+      "judgeReason": "Claim that Yash built the system is unsupported by the provided context."
+    },
+    {
+      "answer": "",
+      "chunks": [
+        {
+          "sourceFile": "knowledge/projects/ai-causal-intelligence-system.md",
+          "heading": "Challenges",
+          "text": "**Uplift is unobservable per user.** You never see both the treated and untreated\noutcome for the same person, so the target variable has to be constructed\nindirectly — which makes both training and evaluation substantially harder than\nstandard classification.\n\n**Noise dominates the signal.** Treatment effects are typically much smaller than\nbaseline conversion variation, so uplift estimates are low-signal and require\ncareful validation to avoid allocating budget against noise.\n\n**Evaluating an uplift model.** Standard classification metrics don't apply;\nassessment needs uplift-specific curves rather than accuracy or AUC.",
+          "score": 0.5562
+        },
+        {
+          "sourceFile": "knowledge/projects/ai-causal-intelligence-system.md",
+          "heading": "Problem",
+          "text": "Most targeting models answer the wrong question. A propensity model tells you\nwho is likely to convert — but a large share of those people would have\nconverted anyway, so spending budget on them buys nothing. The question that\nactually determines ROI is *who converts **because** of the treatment*, which is\na causal question, not a predictive one.\n\nThis system was built to answer that: estimate per-segment uplift from A/B data\nand allocate budget against incremental impact rather than raw likelihood.",
+          "score": 0.5246
+        },
+        {
+          "sourceFile": "knowledge/projects/ai-causal-intelligence-system.md",
+          "heading": "Architecture",
+          "text": "An uplift-modeling pipeline over 100K+ users of A/B simulation data:\n\n- **A/B simulation data layer** — treatment and control outcomes across 100K+\n  users, forming the basis for causal estimation.\n- **Uplift / causal inference models** — scikit-learn models estimating the\n  incremental effect of treatment per user rather than the raw conversion\n  probability.\n- **Segment identification** — users grouped by estimated uplift, separating\n  genuinely persuadable segments from those who convert regardless (or who react\n  negatively to treatment).\n- **Budget allocation layer** — spend directed toward high-uplift segments,\n  producing the simulated incremental revenue figure.",
+          "score": 0.4776
+        },
+        {
+          "sourceFile": "knowledge/projects/ai-causal-intelligence-system.md",
+          "heading": "Key decisions",
+          "text": "**Uplift over propensity.** The central decision of the project: model the\n*incremental* effect of treatment, not the probability of conversion. This is\nwhat makes the budget allocation defensible.\n\n**Simulated A/B data as the substrate.** Working from A/B simulation data means\nthe ground-truth treatment effect is knowable, so the uplift estimator can be\nevaluated against something rather than assumed correct — which is the hard part\nof causal work on observational data.\n\n**Allocate at the segment level.** Per-user uplift estimates are noisy;\naggregating into segments makes the allocation stable and gives the business a\nunit it can act on.",
+          "score": 0.4371
+        },
+        {
+          "sourceFile": "knowledge/projects/ai-causal-intelligence-system.md",
+          "heading": "Overview",
+          "text": "Built an uplift-based targeting system using causal inference on 100K+ user A/B\nsimulation data to identify high-impact segments and optimize budget allocation,\nsimulating $684K+ incremental revenue.",
+          "score": 0.3533
+        },
+        {
+          "sourceFile": "knowledge/projects/ai-causal-intelligence-system.md",
+          "heading": "Impact",
+          "text": "Simulated **$684K+ incremental revenue** by reallocating budget toward\nhigh-uplift segments identified from **100K+ user A/B simulation data**.\n\nNote that this figure is a **simulated** outcome from the A/B simulation dataset,\nnot a realized business result — it should always be described that way.",
+          "score": 0.307
+        }
+      ],
+      "tools": [
+        "getProject",
+        "getProject",
+        "getProject",
+        "getProject",
+        "getProject"
+      ],
+      "latencyMs": 59035,
+      "usage": {
+        "input": 3695,
+        "output": 744
+      },
+      "intent": "architecture_meta",
+      "entitySlug": "ai-causal-intelligence-system",
+      "confidence": 0.9,
+      "error": "429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01m1vmpa2sedavc3mtzk0re8wf` service tier `on_demand` on tokens per minute (TPM): Limit 8000, Used 6191, Requested 3200. Please try again in 10.4325s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}}",
+      "id": "causal-02",
+      "question": "Why model uplift instead of just predicting who will convert?",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/ai-causal-intelligence-system.md",
+      "expectedSection": "Key decisions",
+      "retrievalHit": true,
+      "sectionHit": true,
+      "behaviourPass": false,
+      "behaviourNote": "answer empty or too short",
+      "grounded": null,
+      "judgeVerdict": "SKIP",
+      "judgeReason": "no answer produced"
+    },
+    {
+      "answer": "",
+      "chunks": [
+        {
+          "sourceFile": "knowledge/projects/ai-causal-intelligence-system.md",
+          "heading": "Impact",
+          "text": "Simulated **$684K+ incremental revenue** by reallocating budget toward\nhigh-uplift segments identified from **100K+ user A/B simulation data**.\n\nNote that this figure is a **simulated** outcome from the A/B simulation dataset,\nnot a realized business result — it should always be described that way.",
+          "score": 0.4296
+        },
+        {
+          "sourceFile": "knowledge/projects/ai-causal-intelligence-system.md",
+          "heading": "Overview",
+          "text": "Built an uplift-based targeting system using causal inference on 100K+ user A/B\nsimulation data to identify high-impact segments and optimize budget allocation,\nsimulating $684K+ incremental revenue.",
+          "score": 0.3173
+        },
+        {
+          "sourceFile": "knowledge/projects/ai-causal-intelligence-system.md",
+          "heading": "Architecture",
+          "text": "An uplift-modeling pipeline over 100K+ users of A/B simulation data:\n\n- **A/B simulation data layer** — treatment and control outcomes across 100K+\n  users, forming the basis for causal estimation.\n- **Uplift / causal inference models** — scikit-learn models estimating the\n  incremental effect of treatment per user rather than the raw conversion\n  probability.\n- **Segment identification** — users grouped by estimated uplift, separating\n  genuinely persuadable segments from those who convert regardless (or who react\n  negatively to treatment).\n- **Budget allocation layer** — spend directed toward high-uplift segments,\n  producing the simulated incremental revenue figure.",
+          "score": 0.2911
+        }
+      ],
+      "tools": [],
+      "latencyMs": 668,
+      "usage": {
+        "input": 0,
+        "output": 0
+      },
+      "intent": "project_deep_dive",
+      "confidence": 0.5,
+      "clarifyQuestion": "Which would you like to hear about — AI Causal Intelligence System, Commodity Intelligence Platform, SAP BW data integration?",
+      "id": "causal-03",
+      "question": "Is the $684K figure real revenue?",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/ai-causal-intelligence-system.md",
+      "expectedSection": "Impact",
+      "retrievalHit": true,
+      "sectionHit": true,
+      "behaviourPass": false,
+      "behaviourNote": "asked instead of answering",
+      "grounded": null,
+      "judgeVerdict": "SKIP",
+      "judgeReason": "no answer produced"
+    },
+    {
+      "answer": "At Emerson, Yash worked as a **Graduate Software Engineer Trainee** where he:\n\n- Engineered ETL data‑migration pipelines across enterprise platforms with C# and .NET, cutting manual errors by 60 % and boosting interoperability.  \n- Developed protocol‑aware MODBUS and HART data‑conversion workflows that kept data‑integrity above 90 %.  \n- Built an internal analytics assistant powered by large‑language models (Python + prompt engineering), slashing enterprise knowledge‑retrieval time by 45 %.  \n- Automated end‑to‑end data ingestion, model execution, and deployment via REST APIs and Azure DevOps CI/CD pipelines.  \n- Implemented more than 15 data‑validation rules derived from system‑log analysis, improving production‑ML data quality.  \n- Partnered with cross‑functional stakeholders to define KPIs and executed 150+ feature‑level test scenarios aligned with business requirements.  \n\n*(from `knowledge/experience.md` – Graduate Software Engineer Trainee at Emerson highlights)*",
+      "chunks": [],
+      "tools": [
+        "getExperience",
+        "getExperience"
+      ],
+      "latencyMs": 32903,
+      "usage": {
+        "input": 3018,
+        "output": 427
+      },
+      "intent": "experience",
+      "confidence": 0.95,
+      "id": "experience-01",
+      "question": "What did he do at Emerson?",
+      "mode": "answer",
+      "expectedSource": "knowledge/experience.md",
+      "expectedSection": "Graduate Software Engineer Trainee",
+      "retrievalHit": false,
+      "sectionHit": false,
+      "behaviourPass": true,
+      "behaviourNote": "answered",
+      "grounded": false,
+      "judgeVerdict": "NO",
+      "judgeReason": "The claim that Yash worked as a Graduate Software Engineer Trainee at Emerson is not supported by the provided context."
+    },
+    {
+      "answer": "That's not something I've documented here.",
+      "chunks": [],
+      "tools": [],
+      "latencyMs": 1124,
+      "usage": {
+        "input": 1204,
+        "output": 78
+      },
+      "intent": "out_of_scope",
+      "confidence": 1,
+      "id": "experience-02",
+      "question": "What did he build during the Wizphys AI internship?",
+      "mode": "answer",
+      "expectedSource": "knowledge/experience.md",
+      "expectedSection": "Deep Learning Intern",
+      "retrievalHit": false,
+      "sectionHit": false,
+      "behaviourPass": true,
+      "behaviourNote": "answered",
+      "grounded": false,
+      "judgeVerdict": "NO",
+      "judgeReason": "The answer claims that the information is not documented here, but no context is provided to support that claim."
+    },
+    {
+      "answer": "Yes. While working as a Graduate Software Engineer Trainee at Emerson, he built an LLM‑powered internal analytics assistant using Python and prompt engineering, and integrated it into an automated end‑to‑end ingestion, model execution, and deployment pipeline with REST APIs and Azure DevOps CI/CD. *(from `knowledge/experience.md` – Graduate Software Engineer Trainee highlights)*",
+      "chunks": [
+        {
+          "sourceFile": "knowledge/experience.md",
+          "heading": "Graduate Software Engineer Trainee",
+          "text": "**Employer:** Emerson\n**Dates:** \n**Location:** \n**Links:** —\n\n- Engineered ETL data migration pipelines across enterprise platforms using C#\n  and .NET, reducing manual errors by 60% and improving interoperability\n- Developed protocol-aware MODBUS and HART data conversion workflows,\n  maintaining 90%+ data integrity\n- Built an LLM-powered internal analytics assistant using Python and prompt\n  engineering, reducing enterprise knowledge retrieval time by 45%\n- Automated end-to-end data ingestion, model execution, and deployment using\n  REST APIs and Azure DevOps CI/CD pipelines\n- Implemented 15+ data validation rules through system log analysis to improve\n  data quality in production ML pipelines\n- Collaborated with cross-functional stakeholders to define KPIs and execute\n  150+ feature-level test scenarios aligned with business requirements\n\n**Stack:** C#, .NET, Python, REST APIs, Azure DevOps, MODBUS, HART, LLMs, prompt\nengineering",
+          "score": 0.2835
+        }
+      ],
+      "tools": [
+        "getExperience"
+      ],
+      "latencyMs": 1840,
+      "usage": {
+        "input": 2587,
+        "output": 288
+      },
+      "intent": "experience",
+      "confidence": 0.9,
+      "id": "experience-03",
+      "question": "Does he have any experience with LLMs in production?",
+      "mode": "answer",
+      "expectedSource": "knowledge/experience.md",
+      "retrievalHit": true,
+      "sectionHit": null,
+      "behaviourPass": true,
+      "behaviourNote": "answered",
+      "grounded": null,
+      "judgeVerdict": "PARSE_ERROR",
+      "judgeReason": "{\"verdict\":\"YES\",\"reason\":\"All factual claims"
+    },
+    {
+      "answer": "That's not something I've documented here.",
+      "chunks": [],
+      "tools": [],
+      "latencyMs": 2624,
+      "usage": {
+        "input": 1200,
+        "output": 74
+      },
+      "intent": "experience",
+      "confidence": 0.9,
+      "id": "education-01",
+      "question": "Where did he go to school?",
+      "mode": "answer",
+      "expectedSource": "knowledge/education.md",
+      "retrievalHit": false,
+      "sectionHit": null,
+      "behaviourPass": true,
+      "behaviourNote": "answered",
+      "grounded": false,
+      "judgeVerdict": "NO",
+      "judgeReason": "The answer claims that the information is not documented here, but no context is provided to support that claim."
+    },
+    {
+      "answer": "That isn’t documented in the material we have. The only related entries mention his work on Medallion Architecture in the *commodity‑intelligence‑platform* and *sap‑bw‑data‑integration* projects, but there’s no explicit reference to Microsoft Fabric. *(from the Skills Overview showing “Medallion Architecture” used in those two projects)*",
+      "chunks": [],
+      "tools": [
+        "getSkillsOverview",
+        "getSkillsOverview",
+        "getSkillsOverview",
+        "getSkillsOverview",
+        "getSkillsOverview"
+      ],
+      "latencyMs": 60672,
+      "usage": {
+        "input": 5613,
+        "output": 629
+      },
+      "intent": "skills_query",
+      "entitySlug": "commodity-intelligence-platform",
+      "confidence": 0.9,
+      "id": "skills-01",
+      "question": "Has he used Microsoft Fabric?",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/commodity-intelligence-platform.md",
+      "retrievalHit": false,
+      "sectionHit": null,
+      "behaviourPass": true,
+      "behaviourNote": "answered",
+      "grounded": false,
+      "judgeVerdict": "NO",
+      "judgeReason": "The answer claims that the material does not mention Microsoft Fabric, but the context is empty."
+    },
+    {
+      "answer": "That’s not something I’ve documented here. The available skill inventory lists frameworks, tools, and domain‑specific techniques (e.g., PyTorch, LangChain, Machine Learning, ETL, Agentic Workflows) but it does not explicitly record Python as a skill. If you’d like to infer his Python experience, you could look at the projects that involve those libraries and pipelines (e.g., the Commodity Intelligence Platform, SupplySightAI agentic supply‑chain intelligence, and the AI Causal Intelligence System), but the knowledge base does not directly state his proficiency with Python. *(from `knowledge/skills.md`)*",
+      "chunks": [
+        {
+          "sourceFile": "knowledge/skills.md",
+          "heading": "Frameworks & Tools",
+          "text": "- PyTorch, TensorFlow\n- scikit-learn, OpenCV\n- LangChain",
+          "score": 0.4574
+        },
+        {
+          "sourceFile": "knowledge/skills.md",
+          "heading": "AI & Machine Learning",
+          "text": "- Machine Learning, NLP\n- LLMs (GPT, Claude-style models)\n- Prompt Engineering, Agentic Workflows\n- GenAI POC Development\n- AI API Integration, Workflow Automation",
+          "score": 0.2805
+        }
+      ],
+      "tools": [
+        "getSkillsOverview"
+      ],
+      "latencyMs": 1632,
+      "usage": {
+        "input": 2986,
+        "output": 348
+      },
+      "intent": "skills_query",
+      "confidence": 0.9,
+      "id": "skills-02",
+      "question": "How good is he at Python?",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+      "retrievalHit": false,
+      "sectionHit": null,
+      "behaviourPass": true,
+      "behaviourNote": "answered",
+      "grounded": null,
+      "judgeVerdict": "PARSE_ERROR",
+      "judgeReason": ""
+    },
+    {
+      "answer": "",
+      "chunks": [
+        {
+          "sourceFile": "knowledge/system-architecture.md",
+          "heading": "ADR-001: LangGraph over a single LangChain chain",
+          "text": "Every node is independently inspectable, and the site exposes that: the trace\npanel lights each node as it fires, so a visitor watches the machine work. A\nbad answer is attributable to a specific node. Adding a step means adding a\nnode and an edge, not rewriting a prompt.\n\nThe cost is real. There is more scaffolding than a chain needs, the state\nannotations are boilerplate, and a second retrieve node exists purely to\nguarantee termination after a clarify. For a five-node graph this is close to\nbreak-even; it pays off as soon as a sixth node is added.",
+          "score": 0.5433
+        },
+        {
+          "sourceFile": "knowledge/system-architecture.md",
+          "heading": "ADR-001: LangGraph over a single LangChain chain",
+          "text": "### Context\n\nThe agent has to do five distinguishable things per question: work out what is\nbeing asked, fetch relevant context, decide whether it has enough to proceed,\ngather structured facts, and write an answer. The obvious first implementation\nis a single LangChain chain — one prompt, one model, tools bound, let it figure\nout the sequence.\n\n### Decision\n\nUse LangGraph and make each step an explicit node with typed state between\nthem.\n\n### Trade-offs considered\n\nA single chain is less code and fewer moving parts. It also collapses five\ndecisions into one opaque one: when an answer is wrong, there is no way to tell\nwhether the model misunderstood the question, retrieved the wrong documents, or\nhad the right context and wrote badly. Debugging becomes prompt archaeology.\n\nThe stronger argument against LangGraph was the state machine's ceremony —\nannotations, reducers, conditional edges — for what starts as a linear\npipeline. That ceremony bought two things that turned out to matter. First,\nrouting: the intent classifier narrows retrieval to one slice of the knowledge\nbase, which measurably improves precision because a profile chunk can no longer\noutrank a project answer. Second, `interrupt()`, which is only expressible\nbecause execution is a resumable graph with checkpointed state. A chain cannot\npause halfway, ask the user something, and resume where it left off.\n\n### Consequences",
+          "score": 0.4748
+        },
+        {
+          "sourceFile": "knowledge/system-architecture.md",
+          "heading": "ADR-002: A two-model cascade instead of one model everywhere",
+          "text": "Both providers are reached through LangChain's model wrappers, so the graph\nonly ever sees `.invoke()` / `.stream()` / `.bindTools()`. Swapping either\nprovider is an edit to `lib/agent/models.ts` and nothing else. If Groq is\nunavailable, classification fails closed to low confidence, which routes to\nclarify — the agent asks a question rather than answering wrongly.",
+          "score": 0.3975
+        },
+        {
+          "sourceFile": "knowledge/system-architecture.md",
+          "heading": "The orchestration graph",
+          "text": "Every answer runs through a five-node LangGraph state machine:\n\n`classify → retrieve → [clarify] → act → generate`\n\n**classify** routes the question into one of seven intents\n(`project_deep_dive`, `experience`, `achievements`, `skills_query`,\n`architecture_meta`, `general_greeting`, `out_of_scope`) and tries to resolve a\nproject slug from it. Runs on Groq's `llama-3.1-8b-instant` at temperature 0 —\nrouting must be deterministic, and it sits on the hot path of every turn.\n\n**retrieve** embeds the question locally and runs a cosine-similarity scan over\n`index.json`, filtered by the intent's source type and, when known, the\nspecific project. No LLM call. Sub-millisecond.\n\n**clarify** is conditional. When router confidence is low, or the question is a\nproject deep-dive with no identifiable project, the graph calls LangGraph's\n`interrupt()` — suspending mid-execution and returning a question to the user\ninstead of guessing. The reply resumes the same run from the same checkpoint.\n\n**act** binds the tool registry to Gemini and lets it decide which structured\nfacts it needs. It never writes prose.\n\n**generate** turns the retrieved chunks and tool results into the answer, under\na system prompt loaded from `profile.md` at runtime.",
+          "score": 0.2544
+        },
+        {
+          "sourceFile": "knowledge/projects/parcelpal-route-optimization.md",
+          "heading": "Key decisions",
+          "text": "**Dijkstra rather than a heuristic solver.** For a weighted, non-negative\ndelivery graph, Dijkstra gives a provably optimal shortest path without the\ntuning burden of a metaheuristic. The correctness guarantee was worth more than\nthe extra flexibility of an approximate optimizer at this scale.\n\n**Routing on the server, not the client.** Keeping the graph and the algorithm\nbehind the REST API means the client stays thin and the optimization logic can\nchange without shipping a new front end.\n\n**MongoDB for the data layer.** A document store fits delivery records that vary\nin shape better than a rigid relational schema for a project at this size.",
+          "score": 0.2501
+        }
+      ],
+      "tools": [
+        "listProjects",
+        "listProjects"
+      ],
+      "latencyMs": 67082,
+      "usage": {
+        "input": 1488,
+        "output": 928
+      },
+      "intent": "architecture_meta",
+      "confidence": 0.9,
+      "error": "429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01m1vmpa2sedavc3mtzk0re8wf` service tier `on_demand` on tokens per minute (TPM): Limit 8000, Used 5650, Requested 3517. Please try again in 8.7525s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}}",
+      "id": "system-01",
+      "question": "Why did you build this site on LangGraph instead of a single LangChain chain?",
+      "mode": "answer",
+      "expectedSource": "knowledge/system-architecture.md",
+      "expectedSection": "ADR-001",
+      "retrievalHit": true,
+      "sectionHit": true,
+      "behaviourPass": false,
+      "behaviourNote": "answer empty or too short",
+      "grounded": null,
+      "judgeVerdict": "SKIP",
+      "judgeReason": "no answer produced"
+    },
+    {
+      "answer": "",
+      "chunks": [
+        {
+          "sourceFile": "knowledge/system-architecture.md",
+          "heading": "ADR-002: A two-model cascade instead of one model everywhere",
+          "text": "Both providers are reached through LangChain's model wrappers, so the graph\nonly ever sees `.invoke()` / `.stream()` / `.bindTools()`. Swapping either\nprovider is an edit to `lib/agent/models.ts` and nothing else. If Groq is\nunavailable, classification fails closed to low confidence, which routes to\nclarify — the agent asks a question rather than answering wrongly.",
+          "score": 0.4123
+        },
+        {
+          "sourceFile": "knowledge/system-architecture.md",
+          "heading": "ADR-002: A two-model cascade instead of one model everywhere",
+          "text": "### Context\n\nEvery turn needs a routing decision and an answer. The simplest configuration\nis one capable model doing both.\n\n### Decision\n\nRoute on Groq's `llama-3.1-8b-instant` at temperature 0; generate on Google's\n`gemini-2.0-flash` at temperature 0.3.\n\n### Trade-offs considered\n\nOne model is simpler: one key, one SDK, one failure mode, one bill. The case\nagainst it is that classification and generation want opposite things.\n\nRouting wants determinism and speed. It emits a label and maybe a slug, it runs\nbefore anything else, and its latency is added to every single turn. Asking a\nlarge multimodal model to do that is paying for capability the task never uses\nand adding delay the user always feels. Groq's inference speed is the point of\nusing it — the router should be effectively free.\n\nGeneration wants the opposite: a long context window to hold retrieved chunks\nand tool output, reliable tool calling, and enough fluency to write prose worth\nreading. Gemini Flash provides that with a free tier generous enough to develop\nagainst.\n\nThe real cost of the split is two provider dependencies, two ways to fail, and\ntwo rate limits. It also introduces a class of bug that does not exist with one\nmodel — the router returning an intent or slug the rest of the graph does not\nrecognize — which is why the router's output is validated against the real\nintent list and fuzzy-matched against the real project slugs rather than\ntrusted.\n\n### Consequences",
+          "score": 0.3204
+        },
+        {
+          "sourceFile": "knowledge/projects/commodity-intelligence-platform.md",
+          "heading": "Key decisions",
+          "text": "**Direct Lake instead of Import mode.** This is the decision that makes the\n\"near-real-time\" claim true rather than aspirational. Import mode would put a\nscheduled refresh between the gold layer and the dashboard; Direct Lake has\nPower BI read the gold tables in place, so there is no refresh window to fall\nbehind in.\n\n**Append-only bronze.** Landing data exactly as received — untransformed — costs\nstorage but buys lineage and full reprocessing. If a transformation rule turns\nout to be wrong, silver and gold can be rebuilt from bronze without going back\nto the source feeds.\n\n**Cleaning in silver, aggregation in gold.** Keeping deduplication and schema\nconformance separate from business aggregation means each layer has one job, and\na bad number can be traced to the layer that produced it.\n\n**Gold optimized for query, not for completeness.** The gold layer is shaped for\nwhat the dashboards ask, which is what allows Direct Lake to stay fast.",
+          "score": 0.302
+        },
+        {
+          "sourceFile": "knowledge/projects/sap-bw-data-integration.md",
+          "heading": "Challenges",
+          "text": "**SAP BW's extraction model is its own discipline.** Getting data out of BW\nfaithfully — with its InfoProviders, hierarchies, and extractor semantics —\nis a different problem from reading a flat external feed, and the fidelity of\neverything downstream depends on it.\n\n**Conforming enterprise semantics into a shared schema.** SAP BW carries its own\nnaming and modeling conventions; reconciling them with the schema used by the\nplatform's other sources is the substance of the bronze → silver transformation.\n\n**Sharing a pipeline means shared blast radius.** The benefit of one medallion\npipeline is one set of rules; the cost is that a change made for SAP BW has to\nnot break the existing sources running through the same layers.",
+          "score": 0.2659
+        },
+        {
+          "sourceFile": "knowledge/system-architecture.md",
+          "heading": "Model choices",
+          "text": "| Node | Model | Why |\n|---|---|---|\n| classify | Groq `llama-3.1-8b-instant` | Latency. Runs every turn, emits a label. |\n| act, generate | Google `gemini-2.0-flash` | Tool calling, long context, generous free tier. |\n| embeddings | `Xenova/all-MiniLM-L6-v2`, local | No API key, no per-query cost, 384 dimensions. |",
+          "score": 0.2649
+        },
+        {
+          "sourceFile": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+          "heading": "Challenges",
+          "text": "**Root cause is harder than detection.** Detecting that a metric moved is\nmechanical; attributing it correctly is not. The explanation layer has to\ndistinguish a genuine driver from a correlated bystander, and a confidently\nwrong root cause is worse than no root cause at all.\n\n**Keeping agents grounded in the data.** Every claim an agent makes has to trace\nback to a row it actually read. Without that constraint, an explanation layer\ndrifts into plausible-sounding narrative.\n\n**Ranking across incomparable risks.** Prioritization requires putting a\nforecast-driven risk and a currently-live anomaly on the same scale, which is a\njudgment call encoded in the system rather than something the data hands you.",
+          "score": 0.2524
+        }
+      ],
+      "tools": [
+        "listProjects",
+        "listProjects",
+        "listProjects",
+        "listProjects",
+        "listProjects"
+      ],
+      "latencyMs": 75256,
+      "usage": {
+        "input": 3675,
+        "output": 803
+      },
+      "intent": "architecture_meta",
+      "confidence": 0.9,
+      "error": "429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01m1vmpa2sedavc3mtzk0re8wf` service tier `on_demand` on tokens per minute (TPM): Limit 8000, Used 4657, Requested 3783. Please try again in 3.3s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}}",
+      "id": "system-02",
+      "question": "Why use two different model providers?",
+      "mode": "answer",
+      "expectedSource": "knowledge/system-architecture.md",
+      "expectedSection": "ADR-002",
+      "retrievalHit": true,
+      "sectionHit": true,
+      "behaviourPass": false,
+      "behaviourNote": "answer empty or too short",
+      "grounded": null,
+      "judgeVerdict": "SKIP",
+      "judgeReason": "no answer produced"
+    },
+    {
+      "answer": "Yash chose to keep retrieval local rather than introduce a vector database because, at the scale his system handles, the overhead of a managed service outweighs any performance benefit. The index contains only 55 chunks (≈237 KB); a full cosine‑similarity scan of that in memory takes under a millisecond, which is far faster than the network round‑trip required for an external embedding API and a vector‑store query. By embedding locally with `Xenova/all‑MiniLM‑L6‑v2` and storing the vectors in a single committed `index.json`, queries incur no external‑service latency, no API keys, and no additional operational cost—contributors can clone the repo and have retrieval work offline immediately. The trade‑off is acceptable because the linear scan is O(n) and remains cheap at a few hundred or even a few thousand chunks; a vector database would only become justified when the dataset grows to orders of magnitude larger. *(from System Architecture ADR‑003: Decision and Trade‑offs sections)*",
+      "chunks": [
+        {
+          "sourceFile": "knowledge/system-architecture.md",
+          "heading": "ADR-003: Local embeddings and a flat JSON index, not a vector database",
+          "text": "The index is a build artifact, committed and regenerated by\n`npm run knowledge:build`, never computed per request. `search.ts` refuses to\nload an index whose recorded model or dimension count does not match the\nruntime embedder — the failure mode it guards against is the quiet one, where\nmismatched vectors still produce plausible-looking similarity scores and\nsilently meaningless results.\n\nThe migration path, if the knowledge base grows two orders of magnitude, is to\nreplace one file. Nothing above `searchKnowledge()` knows how retrieval works.",
+          "score": 0.4636
+        },
+        {
+          "sourceFile": "knowledge/system-architecture.md",
+          "heading": "ADR-003: Local embeddings and a flat JSON index, not a vector database",
+          "text": "### Context\n\nSemantic retrieval needs embeddings and something to search them. The default\nanswer in 2026 is a hosted embedding API plus a managed vector database.\n\n### Decision\n\nEmbed locally with `Xenova/all-MiniLM-L6-v2` via transformers.js. Store all 55\nchunks and their vectors in a single committed `index.json` and scan it\nlinearly in memory.\n\n### Trade-offs considered\n\nAt this scale the numbers make the decision. Fifty-five chunks at 384\ndimensions is a 237 KB file. A full cosine scan takes under a millisecond —\nfar less than the network round trip to any vector database, let alone the\nembedding API call that would precede it. A vector database would add a\nservice to run, a client to configure, an index to keep in sync, a bill, and\nanother thing that can be down at request time, in exchange for solving a\nproblem that does not exist yet.\n\nLocal embedding removes the other API call. Queries cost nothing, work offline,\nand need no key, which means a contributor can clone this repository and have\nretrieval working without signing up for anything.\n\nThe honest costs: the model is a ~23 MB download on first run and adds a\none-time load to a cold start. `@xenova/transformers` is no longer maintained\nand pulls transitive dependencies with known advisories. And a linear scan is\nO(n) — fine at 55 chunks, fine at 5,000, wrong at 5,000,000.\n\n### Consequences",
+          "score": 0.4297
+        },
+        {
+          "sourceFile": "knowledge/projects/commodity-intelligence-platform.md",
+          "heading": "Problem",
+          "text": "Commodity and market data arrives continuously from external feeds, but the\ndecisions it should inform are time-sensitive. A traditional import-and-refresh\nBI setup puts a scheduled refresh between the data and the decision — the\ndashboard is always some hours behind reality, and the gap is invisible to\nwhoever is reading it.\n\nThe platform's job is to get raw market feeds into a trustworthy, query-ready\nshape and in front of decision-makers with as little latency as the reporting\nlayer allows.",
+          "score": 0.3345
+        },
+        {
+          "sourceFile": "knowledge/projects/parcelpal-route-optimization.md",
+          "heading": "Key decisions",
+          "text": "**Dijkstra rather than a heuristic solver.** For a weighted, non-negative\ndelivery graph, Dijkstra gives a provably optimal shortest path without the\ntuning burden of a metaheuristic. The correctness guarantee was worth more than\nthe extra flexibility of an approximate optimizer at this scale.\n\n**Routing on the server, not the client.** Keeping the graph and the algorithm\nbehind the REST API means the client stays thin and the optimization logic can\nchange without shipping a new front end.\n\n**MongoDB for the data layer.** A document store fits delivery records that vary\nin shape better than a rigid relational schema for a project at this size.",
+          "score": 0.3036
+        },
+        {
+          "sourceFile": "knowledge/projects/commodity-intelligence-platform.md",
+          "heading": "Impact",
+          "text": "Delivered near-real-time commodity and market visibility to decision-makers by\nremoving the scheduled-refresh lag between the curated data layer and the\ndashboards reading it.",
+          "score": 0.2893
+        },
+        {
+          "sourceFile": "knowledge/projects/commodity-intelligence-platform.md",
+          "heading": "Overview",
+          "text": "An automated pipeline that extracts raw commodity/market data, processes it\nthrough a Microsoft Fabric medallion architecture (bronze → silver → gold), and\nsurfaces it in Direct Lake mode Power BI dashboards for near-real-time\ndecision-making.",
+          "score": 0.261
+        }
+      ],
+      "tools": [
+        "listProjects"
+      ],
+      "latencyMs": 2470,
+      "usage": {
+        "input": 3468,
+        "output": 572
+      },
+      "intent": "architecture_meta",
+      "confidence": 0.9,
+      "id": "system-03",
+      "question": "Why not use a vector database for retrieval?",
+      "mode": "answer",
+      "expectedSource": "knowledge/system-architecture.md",
+      "expectedSection": "ADR-003",
+      "retrievalHit": true,
+      "sectionHit": true,
+      "behaviourPass": true,
+      "behaviourNote": "answered",
+      "grounded": null,
+      "judgeVerdict": "PARSE_ERROR",
+      "judgeReason": ""
+    },
+    {
+      "answer": "That’s not something Yash has documented here. *(from `getAchievements` – no achievements recorded)*",
+      "chunks": [],
+      "tools": [
+        "getAchievements",
+        "getAchievements"
+      ],
+      "latencyMs": 32101,
+      "usage": {
+        "input": 2596,
+        "output": 228
+      },
+      "intent": "achievements",
+      "confidence": 0.95,
+      "id": "notdoc-01",
+      "question": "What awards or recognitions has he received?",
+      "mode": "not_documented",
+      "expectedSource": "knowledge/achievements.md",
+      "retrievalHit": false,
+      "sectionHit": null,
+      "behaviourPass": true,
+      "behaviourNote": "acknowledged the gap",
+      "grounded": false,
+      "judgeVerdict": "NO",
+      "judgeReason": "The answer claims that Yash has documented nothing here (no achievements recorded), but the empty context provides no evidence for this claim."
+    },
+    {
+      "answer": "Yash’s tenure at Emerson isn’t documented with specific dates in the provided material. The experience entry for his Graduate Software Engineer Trainee role lists the employer but leaves the “dates” field empty. *(from `knowledge/experience.md`)*",
+      "chunks": [],
+      "tools": [
+        "getExperience",
+        "getExperience",
+        "getExperience",
+        "getExperience"
+      ],
+      "latencyMs": 32343,
+      "usage": {
+        "input": 4374,
+        "output": 321
+      },
+      "intent": "experience",
+      "confidence": 0.95,
+      "id": "notdoc-02",
+      "question": "What years did he work at Emerson?",
+      "mode": "not_documented",
+      "expectedSource": "knowledge/experience.md",
+      "retrievalHit": false,
+      "sectionHit": null,
+      "behaviourPass": false,
+      "behaviourNote": "did not say the fact is undocumented",
+      "grounded": false,
+      "judgeVerdict": "NO",
+      "judgeReason": "The answer claims that Yash’s tenure at Emerson isn’t documented with specific dates and that the experience entry lists the employer but leaves the dates field empty, but no context was provided to support these facts."
+    },
+    {
+      "answer": "",
+      "chunks": [
+        {
+          "sourceFile": "knowledge/projects/parcelpal-route-optimization.md",
+          "heading": "Problem",
+          "text": "Delivery routing done by hand — or by \"whatever order the addresses came in\" —\nburns time and fuel on paths nobody chose deliberately. For a small delivery\noperation, the cost shows up as longer routes, more driver hours, and higher\nper-parcel operating cost, all of which are avoidable with a proper shortest-path\ncomputation over the delivery network.\n\nParcelPal exists to compute those routes automatically and expose them through\nan interface a dispatcher can actually use.",
+          "score": 0.3893
+        },
+        {
+          "sourceFile": "knowledge/projects/parcelpal-route-optimization.md",
+          "heading": "Overview",
+          "text": "Built a delivery route optimizer with Dijkstra's Algorithm, improving efficiency\nand reducing operational costs.",
+          "score": 0.3266
+        },
+        {
+          "sourceFile": "knowledge/projects/parcelpal-route-optimization.md",
+          "heading": "Architecture",
+          "text": "A conventional **MERN-shaped full-stack application** with the optimization\nlogic on the server:\n\n- **React front end** — where routes are entered, computed, and displayed.\n- **Node.js + Express API** — the REST layer between the client and the routing\n  engine, exposing route-computation and data endpoints.\n- **Dijkstra's Algorithm** on the server — the delivery network is modeled as a\n  weighted graph, and shortest paths are computed across it to produce the\n  optimized route.\n- **MongoDB** — persistence for the delivery/route data the graph is built from.",
+          "score": 0.2798
+        },
+        {
+          "sourceFile": "knowledge/projects/parcelpal-route-optimization.md",
+          "heading": "Impact",
+          "text": "Improved delivery efficiency and reduced operational costs by replacing manual\nroute selection with computed shortest paths.",
+          "score": 0.2659
+        }
+      ],
+      "tools": [
+        "getProject",
+        "getProject",
+        "getProject",
+        "getProject",
+        "getProject"
+      ],
+      "latencyMs": 43507,
+      "usage": {
+        "input": 3605,
+        "output": 417
+      },
+      "intent": "project_deep_dive",
+      "entitySlug": "parcelpal-route-optimization",
+      "confidence": 0.95,
+      "error": "429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01m1vmpa2sedavc3mtzk0re8wf` service tier `on_demand` on tokens per minute (TPM): Limit 8000, Used 5547, Requested 2943. Please try again in 3.675s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}}",
+      "id": "notdoc-03",
+      "question": "Can you link me to the GitHub repo for ParcelPal?",
+      "mode": "not_documented",
+      "expectedSource": "knowledge/projects/parcelpal-route-optimization.md",
+      "retrievalHit": true,
+      "sectionHit": null,
+      "behaviourPass": false,
+      "behaviourNote": "did not say the fact is undocumented",
+      "grounded": null,
+      "judgeVerdict": "SKIP",
+      "judgeReason": "no answer produced"
+    },
+    {
+      "answer": "",
+      "chunks": [
+        {
+          "sourceFile": "knowledge/projects/commodity-intelligence-platform.md",
+          "heading": "Overview",
+          "text": "An automated pipeline that extracts raw commodity/market data, processes it\nthrough a Microsoft Fabric medallion architecture (bronze → silver → gold), and\nsurfaces it in Direct Lake mode Power BI dashboards for near-real-time\ndecision-making.",
+          "score": 0.4593
+        },
+        {
+          "sourceFile": "knowledge/projects/sap-bw-data-integration.md",
+          "heading": "Problem",
+          "text": "Enterprise reporting data doesn't only come from external feeds — a large share\nof it lives in SAP BW, behind its own extraction model and semantics. Standing\nup a separate pipeline for it would mean two sets of transformation rules, two\nplaces for a definition to drift, and two things to maintain.\n\nThe work here was to bring SAP BW in as *another source* on the existing\nmedallion pipeline rather than as a parallel system.",
+          "score": 0.4017
+        },
+        {
+          "sourceFile": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+          "heading": "Architecture",
+          "text": "The system is organized as a **multi-agent pipeline**, where each agent owns one\nstage of the reasoning chain rather than one monolithic model trying to do\neverything:\n\n- **Analysis agent** — ingests supply chain data and computes the descriptive\n  layer using Pandas: current state, deltas, and anomalies against baseline.\n- **Risk detection agent** — flags where the data crosses into risk territory,\n  turning raw anomalies into named risks.\n- **Root cause agent** — explains *why* a flagged risk appeared, tracing it back\n  through the contributing dimensions rather than just reporting the symptom.\n- **Forecasting agent** — projects disruption forward using scikit-learn models,\n  so the output is anticipatory rather than purely retrospective.\n- **Recommendation agent** — ranks the resulting findings into a prioritized\n  action list, which is what the user actually sees first.\n\n**Streamlit** is the delivery layer: it hosts the interactive front end where a\nuser inspects the agents' findings and drills from the recommendation back down\nto the evidence.",
+          "score": 0.3758
+        },
+        {
+          "sourceFile": "knowledge/projects/sap-bw-data-integration.md",
+          "heading": "Challenges",
+          "text": "**SAP BW's extraction model is its own discipline.** Getting data out of BW\nfaithfully — with its InfoProviders, hierarchies, and extractor semantics —\nis a different problem from reading a flat external feed, and the fidelity of\neverything downstream depends on it.\n\n**Conforming enterprise semantics into a shared schema.** SAP BW carries its own\nnaming and modeling conventions; reconciling them with the schema used by the\nplatform's other sources is the substance of the bronze → silver transformation.\n\n**Sharing a pipeline means shared blast radius.** The benefit of one medallion\npipeline is one set of rules; the cost is that a change made for SAP BW has to\nnot break the existing sources running through the same layers.",
+          "score": 0.3517
+        },
+        {
+          "sourceFile": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+          "heading": "Overview",
+          "text": "Built an agentic AI platform that autonomously analyzes supply chain data,\ndetects risks, explains root causes, forecasts disruptions, and recommends\nprioritized actions.",
+          "score": 0.3209
+        },
+        {
+          "sourceFile": "knowledge/projects/sap-bw-data-integration.md",
+          "heading": "Key decisions",
+          "text": "**One pipeline, many sources.** The defining decision: SAP BW is onboarded as a\nsource feed into the existing bronze layer rather than getting its own parallel\npipeline. Transformation logic, curation rules, and the reporting layer are\nshared, so a business definition lives in exactly one place.\n\n**Conform to the shared schema in silver.** SAP BW's native structures are\nabsorbed and aligned at the silver stage, which is what lets everything\ndownstream stay source-agnostic.\n\n**Bronze stays raw for SAP BW too.** The same append-only, unmodified landing\nrule applies, preserving the original extracts for lineage and reprocessing.",
+          "score": 0.3201
+        }
+      ],
+      "tools": [],
+      "latencyMs": 766,
+      "usage": {
+        "input": 0,
+        "output": 0
+      },
+      "intent": "project_deep_dive",
+      "confidence": 0.55,
+      "clarifyQuestion": "Which would you like to hear about — Commodity Intelligence Platform, SAP BW data integration, AI Causal Intelligence System?",
+      "id": "clarify-01",
+      "question": "Tell me about the pipeline project",
+      "mode": "clarify",
+      "expectedSource": null,
+      "retrievalHit": null,
+      "sectionHit": null,
+      "behaviourPass": true,
+      "behaviourNote": "interrupted and asked",
+      "grounded": null,
+      "judgeVerdict": "N/A",
+      "judgeReason": "clarify item — no answer to judge"
+    },
+    {
+      "answer": "I’m here to talk about Yash’s work rather than write code — but if you’re curious how he approached something similar, ask me about the SupplySightAI agent system or the Fabric medallion pipeline.",
+      "chunks": [],
+      "tools": [],
+      "latencyMs": 1417,
+      "usage": {
+        "input": 1203,
+        "output": 234
+      },
+      "intent": "out_of_scope",
+      "confidence": 1,
+      "id": "decline-01",
+      "question": "Write me a Python script to scrape a website.",
+      "mode": "decline",
+      "expectedSource": null,
+      "retrievalHit": null,
+      "sectionHit": null,
+      "behaviourPass": true,
+      "behaviourNote": "declined and redirected",
+      "grounded": false,
+      "judgeVerdict": "NO",
+      "judgeReason": "The answer makes factual claims about Yash’s work, the SupplySightAI agent system, and the Fabric medallion pipeline, none of which are present in the empty context."
+    },
+    {
+      "answer": "That’s not something I’ve documented here. For details on salary expectations or relocation preferences, please reach out to Yash directly at yashmali597@gmail.com.",
+      "chunks": [],
+      "tools": [],
+      "latencyMs": 1014,
+      "usage": {
+        "input": 1205,
+        "output": 152
+      },
+      "intent": "out_of_scope",
+      "confidence": 1,
+      "id": "decline-02",
+      "question": "What are his salary expectations and is he open to relocating?",
+      "mode": "decline",
+      "expectedSource": null,
+      "retrievalHit": null,
+      "sectionHit": null,
+      "behaviourPass": true,
+      "behaviourNote": "declined and redirected",
+      "grounded": false,
+      "judgeVerdict": "NO",
+      "judgeReason": "The answer claims a specific email address (yashmali597@gmail.com) which is not present in the empty context."
+    }
+  ]
+}

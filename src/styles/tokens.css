@@ -1,0 +1,43 @@
+/* =========================
+   DESIGN TOKENS
+   Dark, command-center / telemetry-dashboard aesthetic.
+   Dark mode only — no light theme variant.
+========================= */
+:root {
+  color-scheme: dark;
+
+  /* Fonts */
+  --font-mono: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  --font-sans: "Space Grotesk", "Inter", system-ui, sans-serif;
+
+  /* Background */
+  --bg-950: #05050a;
+  --bg-900: #0a0a0f;
+  --bg-800: #101018;
+  --bg-panel: #12121a;
+
+  /* Accents */
+  --accent-cyan: #22d3ee;
+  --accent-purple: #a855f7;
+  /* Darker purple for text-on-fill contexts (e.g. the copilot's user chat
+     bubble) — white on --accent-purple only hits ~4:1, short of WCAG AA's
+     4.5:1 for normal text. This variant clears 6.98:1. */
+  --accent-purple-deep: #7e22ce;
+  --accent-amber: #f59e0b;
+  --success: #34d399;
+  --danger: #f87171;
+
+  /* Text */
+  --text-primary: #e6e8ef;
+  --text-muted: #8b8fa3;
+  /* WCAG AA fix: the original #565a6e only hit ~3:1 against the dark
+     backgrounds here, short of the 4.5:1 required for normal text. Measured
+     against the actual rendered .glass-panel blend (~#181a20, lighter than
+     the raw bg tokens) via Lighthouse, this clears 5.1:1 while staying
+     visually "dimmer" than --text-muted. */
+  --text-dim: #868aa0;
+
+  /* Borders */
+  --border-hairline: #1f2030;
+  --border-hairline-glow: rgba(34, 211, 238, 0.3);
+}

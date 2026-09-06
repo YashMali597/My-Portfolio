@@ -1,0 +1,1566 @@
+{
+  "summary": {
+    "generatedAt": "2026-09-06T18:15:43.245Z",
+    "models": {
+      "router": "openai/gpt-oss-20b",
+      "routerProvider": "groq",
+      "generation": "openai/gpt-oss-20b",
+      "generationProvider": "groq",
+      "judge": "qwen/qwen3.6-27b"
+    },
+    "datasetVersion": 1,
+    "itemCount": 30,
+    "retrieval": {
+      "passed": 9,
+      "total": 26,
+      "rate": 0.34615384615384615
+    },
+    "sectionPrecision": {
+      "passed": 6,
+      "total": 14,
+      "rate": 0.42857142857142855
+    },
+    "groundedness": {
+      "passed": 3,
+      "total": 4,
+      "rate": 0.75
+    },
+    "behaviour": {
+      "passed": 7,
+      "total": 7,
+      "rate": 1
+    },
+    "byMode": {
+      "answer": {
+        "passed": 7,
+        "total": 7,
+        "rate": 1
+      },
+      "not_documented": {
+        "passed": 0,
+        "total": 0,
+        "rate": null
+      },
+      "clarify": {
+        "passed": 0,
+        "total": 0,
+        "rate": null
+      },
+      "decline": {
+        "passed": 0,
+        "total": 0,
+        "rate": null
+      }
+    },
+    "latencyMs": {
+      "mean": 1819,
+      "p50": 1764,
+      "p95": 2267,
+      "max": 2267
+    },
+    "tokens": {
+      "input": 26343,
+      "output": 3259,
+      "reported": true
+    },
+    "estimatedCostUsd": 0.0039,
+    "errors": 23
+  },
+  "results": [
+    {
+      "answer": "The Commodity Intelligence Platform is a five‑stage Microsoft Fabric medallion pipeline that pulls continuous commodity and market feeds, cleans and aggregates them, and exposes the result to Power BI in Direct Lake mode so dashboards stay near‑real‑time.\n\n1. **Raw Extraction** – Data is pulled from external feeds unchanged and stored in the pipeline’s entry point.  \n2. **Bronze (Raw Ingest)** – The extracted rows land in an append‑only `bronze` layer exactly as received, preserving lineage and enabling full re‑processing if a rule changes.  \n3. **Silver (Cleansed)** – Bronze records are cleaned, validated, and conformed to a consistent schema; duplicates are removed and formats standardised.  \n4. **Gold (Curated)** – Silver data is aggregated into business‑ready tables that Power BI will query. The gold layer is shaped for query performance rather than completeness.  \n5. **Direct Lake Dashboards** – Power BI reads the gold tables directly in Direct Lake mode, eliminating any scheduled‑refresh gap and delivering near‑real‑time visibility to decision‑makers.  \n\nKey design choices that enable this flow are: using Direct Lake instead of Import mode to avoid refresh lag, keeping bronze append‑only for full lineage, separating cleaning from aggregation, and optimising the gold layer for the dashboards’ query patterns.  \n\n*(from the Commodity Intelligence Platform’s Architecture section)*",
+      "chunks": [
+        {
+          "sourceFile": "knowledge/projects/commodity-intelligence-platform.md",
+          "heading": "Overview",
+          "text": "An automated pipeline that extracts raw commodity/market data, processes it\nthrough a Microsoft Fabric medallion architecture (bronze → silver → gold), and\nsurfaces it in Direct Lake mode Power BI dashboards for near-real-time\ndecision-making.",
+          "score": 0.6915
+        },
+        {
+          "sourceFile": "knowledge/projects/commodity-intelligence-platform.md",
+          "heading": "Impact",
+          "text": "Delivered near-real-time commodity and market visibility to decision-makers by\nremoving the scheduled-refresh lag between the curated data layer and the\ndashboards reading it.",
+          "score": 0.5575
+        },
+        {
+          "sourceFile": "knowledge/projects/commodity-intelligence-platform.md",
+          "heading": "Architecture",
+          "text": "Five stages, implemented as a **Microsoft Fabric medallion architecture** with a\nDirect Lake reporting layer. These stage descriptions are migrated verbatim from\nthe interactive pipeline diagram on the previous site.\n\n**1. Raw Extraction** *(icon: Database)*\nRaw commodity and market data is pulled from source feeds into the pipeline,\nunchanged and untransformed — the entry point for everything downstream.\n\n**2. Bronze — Raw Ingest** *(icon: Layers)*\nExtracted data lands in the `bronze` layer exactly as received — a raw,\nappend-only landing zone that preserves the original records for lineage and\nreprocessing.\n\n**3. Silver — Cleansed** *(icon: Filter)*\nBronze records are cleaned, validated, and conformed into a consistent schema in\nthe `silver` layer, removing duplicates and standardizing formats.\n\n**4. Gold — Curated** *(icon: Gem)*\nSilver data is aggregated into business-ready tables in the `gold` layer — the\ncurated, query-optimized layer that reporting tools read from.\n\n**5. Direct Lake Dashboards** *(icon: LayoutDashboard, status: active)*\nPower BI queries the `gold` layer directly in `Direct Lake` mode — no import or\nscheduled refresh — so dashboards reflect near-real-time data for\ndecision-making.",
+          "score": 0.5544
+        },
+        {
+          "sourceFile": "knowledge/projects/commodity-intelligence-platform.md",
+          "heading": "Problem",
+          "text": "Commodity and market data arrives continuously from external feeds, but the\ndecisions it should inform are time-sensitive. A traditional import-and-refresh\nBI setup puts a scheduled refresh between the data and the decision — the\ndashboard is always some hours behind reality, and the gap is invisible to\nwhoever is reading it.\n\nThe platform's job is to get raw market feeds into a trustworthy, query-ready\nshape and in front of decision-makers with as little latency as the reporting\nlayer allows.",
+          "score": 0.5328
+        },
+        {
+          "sourceFile": "knowledge/projects/commodity-intelligence-platform.md",
+          "heading": "Key decisions",
+          "text": "**Direct Lake instead of Import mode.** This is the decision that makes the\n\"near-real-time\" claim true rather than aspirational. Import mode would put a\nscheduled refresh between the gold layer and the dashboard; Direct Lake has\nPower BI read the gold tables in place, so there is no refresh window to fall\nbehind in.\n\n**Append-only bronze.** Landing data exactly as received — untransformed — costs\nstorage but buys lineage and full reprocessing. If a transformation rule turns\nout to be wrong, silver and gold can be rebuilt from bronze without going back\nto the source feeds.\n\n**Cleaning in silver, aggregation in gold.** Keeping deduplication and schema\nconformance separate from business aggregation means each layer has one job, and\na bad number can be traced to the layer that produced it.\n\n**Gold optimized for query, not for completeness.** The gold layer is shaped for\nwhat the dashboards ask, which is what allows Direct Lake to stay fast.",
+          "score": 0.4927
+        },
+        {
+          "sourceFile": "knowledge/projects/commodity-intelligence-platform.md",
+          "heading": "Challenges",
+          "text": "**Direct Lake has constraints Import mode doesn't.** Reading gold tables in place\nmeans the gold layer's physical shape directly determines dashboard performance\n— modeling mistakes surface as slow visuals rather than slow refreshes.\n\n**Schema drift from upstream feeds.** External commodity/market sources change\nshape without notice, and an append-only bronze layer means the drift lands\nintact and has to be absorbed in the bronze → silver transformation.\n\n**Deduplication across an append-only landing zone.** Because bronze never\noverwrites, silver carries the full burden of resolving duplicate and superseded\nrecords into a single consistent view.",
+          "score": 0.4353
+        }
+      ],
+      "tools": [
+        "getProject"
+      ],
+      "toolResults": [
+        {
+          "tool": "getProject",
+          "data": {
+            "found": true,
+            "project": {
+              "slug": "commodity-intelligence-platform",
+              "title": "Commodity Intelligence Platform",
+              "oneLiner": "An automated pipeline that extracts raw commodity/market data, processes it through a Microsoft Fabric medallion architecture (bronze → silver → gold), and surfaces it in Direct Lake mode Power BI dashboards for near-real-time decision-making.",
+              "skills": [
+                "Data Engineering",
+                "Medallion Architecture",
+                "ETL",
+                "Dashboarding",
+                "Data Modeling"
+              ],
+              "stack": [
+                "Microsoft Fabric",
+                "Power BI (Direct Lake)",
+                "Medallion Architecture (Bronze/Silver/Gold)"
+              ],
+              "timeframe": "",
+              "links": {
+                "repo": "",
+                "demo": "",
+                "writeup": ""
+              },
+              "sections": {
+                "problem": "Commodity and market data arrives continuously from external feeds, but the\ndecisions it should inform are time-sensitive. A traditional import-and-refresh\nBI setup puts a scheduled refresh between the data and the decision — the\ndashboard is always some hours behind reality, and the gap is invisible to\nwhoever is reading it.\n\nThe platform's job is to get raw market feeds into a trustworthy, query-ready\nshape and in front of decision-makers with as little latency as the reporting\nlayer allows.",
+                "architecture": "Five stages, implemented as a **Microsoft Fabric medallion architecture** with a\nDirect Lake reporting layer. These stage descriptions are migrated verbatim from\nthe interactive pipeline diagram on the previous site.\n\n**1. Raw Extraction** *(icon: Database)*\nRaw commodity and market data is pulled from source feeds into the pipeline,\nunchanged and untransformed — the entry point for everything downstream.\n\n**2. Bronze — Raw Ingest** *(icon: Layers)*\nExtracted data lands in the `bronze` layer exactly as received — a raw,\nappend-only landing zone that preserves the original records for lineage and\nreprocessing.\n\n**3. Silver — Cleansed** *(icon: Filter)*\nBronze records are cleaned, validated, and conformed into a consistent schema in\nthe `silver` layer, removing duplicates and standardizing formats.\n\n**4. Gold — Curated** *(icon: Gem)*\nSilver data is aggregated into business-ready tables in the `gold` layer — the\ncurated, query-optimized layer that reporting tools read from.\n\n**5. Direct Lake Dashboards** *(icon: LayoutDashboard, status: active)*\nPower BI queries the `gold` layer directly in `Direct Lake` mode — no import or\nscheduled refresh — so dashboards reflect near-real-time data for\ndecision-making.",
+                "decisions": "**Direct Lake instead of Import mode.** This is the decision that makes the\n\"near-real-time\" claim true rather than aspirational. Import mode would put a\nscheduled refresh between the gold layer and the dashboard; Direct Lake has\nPower BI read the gold tables in place, so there is no refresh window to fall\nbehind in.\n\n**Append-only bronze.** Landing data exactly as received — untransformed — costs\nstorage but buys lineage and full reprocessing. If a transformation rule turns\nout to be wrong, silver and gold can be rebuilt from bronze without going back\nto the source feeds.\n\n**Cleaning in silver, aggregation in gold.** Keeping deduplication and schema\nconformance separate from business aggregation means each layer has one job, and\na bad number can be traced to the layer that produced it.\n\n**Gold optimized for query, not for completeness.** The gold layer is shaped for\nwhat the dashboards ask, which is what allows Direct Lake to stay fast.",
+                "challenges": "**Direct Lake has constraints Import mode doesn't.** Reading gold tables in place\nmeans the gold layer's physical shape directly determines dashboard performance\n— modeling mistakes surface as slow visuals rather than slow refreshes.\n\n**Schema drift from upstream feeds.** External commodity/market sources change\nshape without notice, and an append-only bronze layer means the drift lands\nintact and has to be absorbed in the bronze → silver transformation.\n\n**Deduplication across an append-only landing zone.** Because bronze never\noverwrites, silver carries the full burden of resolving duplicate and superseded\nrecords into a single consistent view.",
+                "impact": "Delivered near-real-time commodity and market visibility to decision-makers by\nremoving the scheduled-refresh lag between the curated data layer and the\ndashboards reading it."
+              },
+              "sourceFile": "knowledge/projects/commodity-intelligence-platform.md",
+              "missingSections": []
+            }
+          }
+        }
+      ],
+      "latencyMs": 2267,
+      "usage": {
+        "input": 3829,
+        "output": 546
+      },
+      "intent": "architecture_meta",
+      "entitySlug": "commodity-intelligence-platform",
+      "confidence": 0.95,
+      "id": "commodity-01",
+      "question": "How does the Commodity Intelligence Platform pipeline work?",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/commodity-intelligence-platform.md",
+      "expectedSection": "Architecture",
+      "retrievalHit": true,
+      "sectionHit": true,
+      "behaviourPass": true,
+      "behaviourNote": "answered",
+      "grounded": null,
+      "judgeVerdict": "PARSE_ERROR",
+      "judgeReason": "\n<think>\nHere's a thinking process:\n\n1.  **Analyze the Request:**\n   - Role: Strict grounding judge.\n   - Task: Evaluate if every factual claim in the ANSWER is"
+    },
+    {
+      "answer": "Yash chose **Direct Lake** so that the Power BI dashboards could read the gold tables *in place* rather than through a scheduled import.  \nWith Import mode, Power BI would have to run a refresh between the gold layer and the report, creating a lag that could be several hours. Direct Lake eliminates that refresh window, letting the dashboards always show the most recent data from the curated gold layer and keeping the visual performance tied directly to the physical shape of those tables.  \n\n*(from the Commodity Intelligence Platform’s Key decisions and Architecture sections)*",
+      "chunks": [
+        {
+          "sourceFile": "knowledge/projects/commodity-intelligence-platform.md",
+          "heading": "Challenges",
+          "text": "**Direct Lake has constraints Import mode doesn't.** Reading gold tables in place\nmeans the gold layer's physical shape directly determines dashboard performance\n— modeling mistakes surface as slow visuals rather than slow refreshes.\n\n**Schema drift from upstream feeds.** External commodity/market sources change\nshape without notice, and an append-only bronze layer means the drift lands\nintact and has to be absorbed in the bronze → silver transformation.\n\n**Deduplication across an append-only landing zone.** Because bronze never\noverwrites, silver carries the full burden of resolving duplicate and superseded\nrecords into a single consistent view.",
+          "score": 0.4597
+        },
+        {
+          "sourceFile": "knowledge/projects/commodity-intelligence-platform.md",
+          "heading": "Key decisions",
+          "text": "**Direct Lake instead of Import mode.** This is the decision that makes the\n\"near-real-time\" claim true rather than aspirational. Import mode would put a\nscheduled refresh between the gold layer and the dashboard; Direct Lake has\nPower BI read the gold tables in place, so there is no refresh window to fall\nbehind in.\n\n**Append-only bronze.** Landing data exactly as received — untransformed — costs\nstorage but buys lineage and full reprocessing. If a transformation rule turns\nout to be wrong, silver and gold can be rebuilt from bronze without going back\nto the source feeds.\n\n**Cleaning in silver, aggregation in gold.** Keeping deduplication and schema\nconformance separate from business aggregation means each layer has one job, and\na bad number can be traced to the layer that produced it.\n\n**Gold optimized for query, not for completeness.** The gold layer is shaped for\nwhat the dashboards ask, which is what allows Direct Lake to stay fast.",
+          "score": 0.4537
+        },
+        {
+          "sourceFile": "knowledge/projects/commodity-intelligence-platform.md",
+          "heading": "Architecture",
+          "text": "Five stages, implemented as a **Microsoft Fabric medallion architecture** with a\nDirect Lake reporting layer. These stage descriptions are migrated verbatim from\nthe interactive pipeline diagram on the previous site.\n\n**1. Raw Extraction** *(icon: Database)*\nRaw commodity and market data is pulled from source feeds into the pipeline,\nunchanged and untransformed — the entry point for everything downstream.\n\n**2. Bronze — Raw Ingest** *(icon: Layers)*\nExtracted data lands in the `bronze` layer exactly as received — a raw,\nappend-only landing zone that preserves the original records for lineage and\nreprocessing.\n\n**3. Silver — Cleansed** *(icon: Filter)*\nBronze records are cleaned, validated, and conformed into a consistent schema in\nthe `silver` layer, removing duplicates and standardizing formats.\n\n**4. Gold — Curated** *(icon: Gem)*\nSilver data is aggregated into business-ready tables in the `gold` layer — the\ncurated, query-optimized layer that reporting tools read from.\n\n**5. Direct Lake Dashboards** *(icon: LayoutDashboard, status: active)*\nPower BI queries the `gold` layer directly in `Direct Lake` mode — no import or\nscheduled refresh — so dashboards reflect near-real-time data for\ndecision-making.",
+          "score": 0.4303
+        },
+        {
+          "sourceFile": "knowledge/projects/sap-bw-data-integration.md",
+          "heading": "Problem",
+          "text": "Enterprise reporting data doesn't only come from external feeds — a large share\nof it lives in SAP BW, behind its own extraction model and semantics. Standing\nup a separate pipeline for it would mean two sets of transformation rules, two\nplaces for a definition to drift, and two things to maintain.\n\nThe work here was to bring SAP BW in as *another source* on the existing\nmedallion pipeline rather than as a parallel system.",
+          "score": 0.3591
+        },
+        {
+          "sourceFile": "knowledge/projects/sap-bw-data-integration.md",
+          "heading": "Impact",
+          "text": "Brought an enterprise SAP BW source into the existing Fabric medallion pipeline\nwithout standing up a parallel stack, so downstream reporting consumes SAP BW\ndata through the same curated gold layer as every other source.",
+          "score": 0.3524
+        },
+        {
+          "sourceFile": "knowledge/projects/sap-bw-data-integration.md",
+          "heading": "Challenges",
+          "text": "**SAP BW's extraction model is its own discipline.** Getting data out of BW\nfaithfully — with its InfoProviders, hierarchies, and extractor semantics —\nis a different problem from reading a flat external feed, and the fidelity of\neverything downstream depends on it.\n\n**Conforming enterprise semantics into a shared schema.** SAP BW carries its own\nnaming and modeling conventions; reconciling them with the schema used by the\nplatform's other sources is the substance of the bronze → silver transformation.\n\n**Sharing a pipeline means shared blast radius.** The benefit of one medallion\npipeline is one set of rules; the cost is that a change made for SAP BW has to\nnot break the existing sources running through the same layers.",
+          "score": 0.3425
+        }
+      ],
+      "tools": [
+        "getProject"
+      ],
+      "toolResults": [
+        {
+          "tool": "getProject",
+          "data": {
+            "found": true,
+            "project": {
+              "slug": "commodity-intelligence-platform",
+              "title": "Commodity Intelligence Platform",
+              "oneLiner": "An automated pipeline that extracts raw commodity/market data, processes it through a Microsoft Fabric medallion architecture (bronze → silver → gold), and surfaces it in Direct Lake mode Power BI dashboards for near-real-time decision-making.",
+              "skills": [
+                "Data Engineering",
+                "Medallion Architecture",
+                "ETL",
+                "Dashboarding",
+                "Data Modeling"
+              ],
+              "stack": [
+                "Microsoft Fabric",
+                "Power BI (Direct Lake)",
+                "Medallion Architecture (Bronze/Silver/Gold)"
+              ],
+              "timeframe": "",
+              "links": {
+                "repo": "",
+                "demo": "",
+                "writeup": ""
+              },
+              "sections": {
+                "problem": "Commodity and market data arrives continuously from external feeds, but the\ndecisions it should inform are time-sensitive. A traditional import-and-refresh\nBI setup puts a scheduled refresh between the data and the decision — the\ndashboard is always some hours behind reality, and the gap is invisible to\nwhoever is reading it.\n\nThe platform's job is to get raw market feeds into a trustworthy, query-ready\nshape and in front of decision-makers with as little latency as the reporting\nlayer allows.",
+                "architecture": "Five stages, implemented as a **Microsoft Fabric medallion architecture** with a\nDirect Lake reporting layer. These stage descriptions are migrated verbatim from\nthe interactive pipeline diagram on the previous site.\n\n**1. Raw Extraction** *(icon: Database)*\nRaw commodity and market data is pulled from source feeds into the pipeline,\nunchanged and untransformed — the entry point for everything downstream.\n\n**2. Bronze — Raw Ingest** *(icon: Layers)*\nExtracted data lands in the `bronze` layer exactly as received — a raw,\nappend-only landing zone that preserves the original records for lineage and\nreprocessing.\n\n**3. Silver — Cleansed** *(icon: Filter)*\nBronze records are cleaned, validated, and conformed into a consistent schema in\nthe `silver` layer, removing duplicates and standardizing formats.\n\n**4. Gold — Curated** *(icon: Gem)*\nSilver data is aggregated into business-ready tables in the `gold` layer — the\ncurated, query-optimized layer that reporting tools read from.\n\n**5. Direct Lake Dashboards** *(icon: LayoutDashboard, status: active)*\nPower BI queries the `gold` layer directly in `Direct Lake` mode — no import or\nscheduled refresh — so dashboards reflect near-real-time data for\ndecision-making.",
+                "decisions": "**Direct Lake instead of Import mode.** This is the decision that makes the\n\"near-real-time\" claim true rather than aspirational. Import mode would put a\nscheduled refresh between the gold layer and the dashboard; Direct Lake has\nPower BI read the gold tables in place, so there is no refresh window to fall\nbehind in.\n\n**Append-only bronze.** Landing data exactly as received — untransformed — costs\nstorage but buys lineage and full reprocessing. If a transformation rule turns\nout to be wrong, silver and gold can be rebuilt from bronze without going back\nto the source feeds.\n\n**Cleaning in silver, aggregation in gold.** Keeping deduplication and schema\nconformance separate from business aggregation means each layer has one job, and\na bad number can be traced to the layer that produced it.\n\n**Gold optimized for query, not for completeness.** The gold layer is shaped for\nwhat the dashboards ask, which is what allows Direct Lake to stay fast.",
+                "challenges": "**Direct Lake has constraints Import mode doesn't.** Reading gold tables in place\nmeans the gold layer's physical shape directly determines dashboard performance\n— modeling mistakes surface as slow visuals rather than slow refreshes.\n\n**Schema drift from upstream feeds.** External commodity/market sources change\nshape without notice, and an append-only bronze layer means the drift lands\nintact and has to be absorbed in the bronze → silver transformation.\n\n**Deduplication across an append-only landing zone.** Because bronze never\noverwrites, silver carries the full burden of resolving duplicate and superseded\nrecords into a single consistent view.",
+                "impact": "Delivered near-real-time commodity and market visibility to decision-makers by\nremoving the scheduled-refresh lag between the curated data layer and the\ndashboards reading it."
+              },
+              "sourceFile": "knowledge/projects/commodity-intelligence-platform.md",
+              "missingSections": []
+            }
+          }
+        }
+      ],
+      "latencyMs": 1963,
+      "usage": {
+        "input": 3943,
+        "output": 412
+      },
+      "intent": "architecture_meta",
+      "confidence": 0.92,
+      "id": "commodity-02",
+      "question": "Why did he use Direct Lake mode instead of importing the data into Power BI?",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/commodity-intelligence-platform.md",
+      "expectedSection": "Key decisions",
+      "retrievalHit": true,
+      "sectionHit": true,
+      "behaviourPass": true,
+      "behaviourNote": "answered",
+      "grounded": false,
+      "judgeVerdict": "NO",
+      "judgeReason": "The answer claims that Import mode creates a lag that 'could be several hours,' which is a specific detail not stated in the provided context."
+    },
+    {
+      "answer": "The bronze layer is the raw‑ingest landing zone. It stores every record exactly as it arrives from the external feeds, in an append‑only fashion. This preserves the original data for full lineage and allows the pipeline to be re‑run or rebuilt from scratch if a transformation rule later turns out to be wrong. (from the Commodity Intelligence Platform’s Architecture and Key decisions sections)",
+      "chunks": [
+        {
+          "sourceFile": "knowledge/projects/commodity-intelligence-platform.md",
+          "heading": "Challenges",
+          "text": "**Direct Lake has constraints Import mode doesn't.** Reading gold tables in place\nmeans the gold layer's physical shape directly determines dashboard performance\n— modeling mistakes surface as slow visuals rather than slow refreshes.\n\n**Schema drift from upstream feeds.** External commodity/market sources change\nshape without notice, and an append-only bronze layer means the drift lands\nintact and has to be absorbed in the bronze → silver transformation.\n\n**Deduplication across an append-only landing zone.** Because bronze never\noverwrites, silver carries the full burden of resolving duplicate and superseded\nrecords into a single consistent view.",
+          "score": 0.5222
+        },
+        {
+          "sourceFile": "knowledge/projects/commodity-intelligence-platform.md",
+          "heading": "Architecture",
+          "text": "Five stages, implemented as a **Microsoft Fabric medallion architecture** with a\nDirect Lake reporting layer. These stage descriptions are migrated verbatim from\nthe interactive pipeline diagram on the previous site.\n\n**1. Raw Extraction** *(icon: Database)*\nRaw commodity and market data is pulled from source feeds into the pipeline,\nunchanged and untransformed — the entry point for everything downstream.\n\n**2. Bronze — Raw Ingest** *(icon: Layers)*\nExtracted data lands in the `bronze` layer exactly as received — a raw,\nappend-only landing zone that preserves the original records for lineage and\nreprocessing.\n\n**3. Silver — Cleansed** *(icon: Filter)*\nBronze records are cleaned, validated, and conformed into a consistent schema in\nthe `silver` layer, removing duplicates and standardizing formats.\n\n**4. Gold — Curated** *(icon: Gem)*\nSilver data is aggregated into business-ready tables in the `gold` layer — the\ncurated, query-optimized layer that reporting tools read from.\n\n**5. Direct Lake Dashboards** *(icon: LayoutDashboard, status: active)*\nPower BI queries the `gold` layer directly in `Direct Lake` mode — no import or\nscheduled refresh — so dashboards reflect near-real-time data for\ndecision-making.",
+          "score": 0.5195
+        },
+        {
+          "sourceFile": "knowledge/projects/commodity-intelligence-platform.md",
+          "heading": "Key decisions",
+          "text": "**Direct Lake instead of Import mode.** This is the decision that makes the\n\"near-real-time\" claim true rather than aspirational. Import mode would put a\nscheduled refresh between the gold layer and the dashboard; Direct Lake has\nPower BI read the gold tables in place, so there is no refresh window to fall\nbehind in.\n\n**Append-only bronze.** Landing data exactly as received — untransformed — costs\nstorage but buys lineage and full reprocessing. If a transformation rule turns\nout to be wrong, silver and gold can be rebuilt from bronze without going back\nto the source feeds.\n\n**Cleaning in silver, aggregation in gold.** Keeping deduplication and schema\nconformance separate from business aggregation means each layer has one job, and\na bad number can be traced to the layer that produced it.\n\n**Gold optimized for query, not for completeness.** The gold layer is shaped for\nwhat the dashboards ask, which is what allows Direct Lake to stay fast.",
+          "score": 0.5015
+        },
+        {
+          "sourceFile": "knowledge/projects/commodity-intelligence-platform.md",
+          "heading": "Overview",
+          "text": "An automated pipeline that extracts raw commodity/market data, processes it\nthrough a Microsoft Fabric medallion architecture (bronze → silver → gold), and\nsurfaces it in Direct Lake mode Power BI dashboards for near-real-time\ndecision-making.",
+          "score": 0.4623
+        },
+        {
+          "sourceFile": "knowledge/projects/commodity-intelligence-platform.md",
+          "heading": "Impact",
+          "text": "Delivered near-real-time commodity and market visibility to decision-makers by\nremoving the scheduled-refresh lag between the curated data layer and the\ndashboards reading it.",
+          "score": 0.3597
+        },
+        {
+          "sourceFile": "knowledge/projects/commodity-intelligence-platform.md",
+          "heading": "Problem",
+          "text": "Commodity and market data arrives continuously from external feeds, but the\ndecisions it should inform are time-sensitive. A traditional import-and-refresh\nBI setup puts a scheduled refresh between the data and the decision — the\ndashboard is always some hours behind reality, and the gap is invisible to\nwhoever is reading it.\n\nThe platform's job is to get raw market feeds into a trustworthy, query-ready\nshape and in front of decision-makers with as little latency as the reporting\nlayer allows.",
+          "score": 0.3068
+        }
+      ],
+      "tools": [
+        "getProject"
+      ],
+      "toolResults": [
+        {
+          "tool": "getProject",
+          "data": {
+            "found": true,
+            "project": {
+              "slug": "commodity-intelligence-platform",
+              "title": "Commodity Intelligence Platform",
+              "oneLiner": "An automated pipeline that extracts raw commodity/market data, processes it through a Microsoft Fabric medallion architecture (bronze → silver → gold), and surfaces it in Direct Lake mode Power BI dashboards for near-real-time decision-making.",
+              "skills": [
+                "Data Engineering",
+                "Medallion Architecture",
+                "ETL",
+                "Dashboarding",
+                "Data Modeling"
+              ],
+              "stack": [
+                "Microsoft Fabric",
+                "Power BI (Direct Lake)",
+                "Medallion Architecture (Bronze/Silver/Gold)"
+              ],
+              "timeframe": "",
+              "links": {
+                "repo": "",
+                "demo": "",
+                "writeup": ""
+              },
+              "sections": {
+                "problem": "Commodity and market data arrives continuously from external feeds, but the\ndecisions it should inform are time-sensitive. A traditional import-and-refresh\nBI setup puts a scheduled refresh between the data and the decision — the\ndashboard is always some hours behind reality, and the gap is invisible to\nwhoever is reading it.\n\nThe platform's job is to get raw market feeds into a trustworthy, query-ready\nshape and in front of decision-makers with as little latency as the reporting\nlayer allows.",
+                "architecture": "Five stages, implemented as a **Microsoft Fabric medallion architecture** with a\nDirect Lake reporting layer. These stage descriptions are migrated verbatim from\nthe interactive pipeline diagram on the previous site.\n\n**1. Raw Extraction** *(icon: Database)*\nRaw commodity and market data is pulled from source feeds into the pipeline,\nunchanged and untransformed — the entry point for everything downstream.\n\n**2. Bronze — Raw Ingest** *(icon: Layers)*\nExtracted data lands in the `bronze` layer exactly as received — a raw,\nappend-only landing zone that preserves the original records for lineage and\nreprocessing.\n\n**3. Silver — Cleansed** *(icon: Filter)*\nBronze records are cleaned, validated, and conformed into a consistent schema in\nthe `silver` layer, removing duplicates and standardizing formats.\n\n**4. Gold — Curated** *(icon: Gem)*\nSilver data is aggregated into business-ready tables in the `gold` layer — the\ncurated, query-optimized layer that reporting tools read from.\n\n**5. Direct Lake Dashboards** *(icon: LayoutDashboard, status: active)*\nPower BI queries the `gold` layer directly in `Direct Lake` mode — no import or\nscheduled refresh — so dashboards reflect near-real-time data for\ndecision-making.",
+                "decisions": "**Direct Lake instead of Import mode.** This is the decision that makes the\n\"near-real-time\" claim true rather than aspirational. Import mode would put a\nscheduled refresh between the gold layer and the dashboard; Direct Lake has\nPower BI read the gold tables in place, so there is no refresh window to fall\nbehind in.\n\n**Append-only bronze.** Landing data exactly as received — untransformed — costs\nstorage but buys lineage and full reprocessing. If a transformation rule turns\nout to be wrong, silver and gold can be rebuilt from bronze without going back\nto the source feeds.\n\n**Cleaning in silver, aggregation in gold.** Keeping deduplication and schema\nconformance separate from business aggregation means each layer has one job, and\na bad number can be traced to the layer that produced it.\n\n**Gold optimized for query, not for completeness.** The gold layer is shaped for\nwhat the dashboards ask, which is what allows Direct Lake to stay fast.",
+                "challenges": "**Direct Lake has constraints Import mode doesn't.** Reading gold tables in place\nmeans the gold layer's physical shape directly determines dashboard performance\n— modeling mistakes surface as slow visuals rather than slow refreshes.\n\n**Schema drift from upstream feeds.** External commodity/market sources change\nshape without notice, and an append-only bronze layer means the drift lands\nintact and has to be absorbed in the bronze → silver transformation.\n\n**Deduplication across an append-only landing zone.** Because bronze never\noverwrites, silver carries the full burden of resolving duplicate and superseded\nrecords into a single consistent view.",
+                "impact": "Delivered near-real-time commodity and market visibility to decision-makers by\nremoving the scheduled-refresh lag between the curated data layer and the\ndashboards reading it."
+              },
+              "sourceFile": "knowledge/projects/commodity-intelligence-platform.md",
+              "missingSections": []
+            }
+          }
+        }
+      ],
+      "latencyMs": 1764,
+      "usage": {
+        "input": 3833,
+        "output": 302
+      },
+      "intent": "architecture_meta",
+      "entitySlug": "commodity-intelligence-platform",
+      "confidence": 0.95,
+      "id": "commodity-03",
+      "question": "What is the bronze layer for in the commodity platform?",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/commodity-intelligence-platform.md",
+      "expectedSection": "Architecture",
+      "retrievalHit": true,
+      "sectionHit": true,
+      "behaviourPass": true,
+      "behaviourNote": "answered",
+      "grounded": null,
+      "judgeVerdict": "ERROR",
+      "judgeReason": "429 {\"error\":{\"message\":\"Request too large for model `qwen/qwen3.6-27b` in organization `org_01m1vmpa2sedavc3mtzk0re8wf` service tier `on_demand` on output tokens per minute (OTPM): Limit 1000, Requested 1024. The request's expected output tokens exceed the enforced limit; reduce max_tokens (or the request's expected output) and try again. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}}"
+    },
+    {
+      "answer": "Yes. Yash worked with SAP BW as part of the **SAP BW data integration** project, bringing the enterprise SAP BW source into the existing Fabric medallion pipeline and handling its extraction, transformation, and downstream reporting. (from `knowledge/projects/sap-bw-data-integration.md`)",
+      "chunks": [
+        {
+          "sourceFile": "knowledge/projects/sap-bw-data-integration.md",
+          "heading": "Overview",
+          "text": "Integrates SAP BW as a source system into the same Fabric-based pipeline,\nhandling extraction and transformation into the medallion layers feeding\ndownstream reporting.",
+          "score": 0.4441
+        },
+        {
+          "sourceFile": "knowledge/projects/sap-bw-data-integration.md",
+          "heading": "Impact",
+          "text": "Brought an enterprise SAP BW source into the existing Fabric medallion pipeline\nwithout standing up a parallel stack, so downstream reporting consumes SAP BW\ndata through the same curated gold layer as every other source.",
+          "score": 0.4113
+        },
+        {
+          "sourceFile": "knowledge/projects/sap-bw-data-integration.md",
+          "heading": "Problem",
+          "text": "Enterprise reporting data doesn't only come from external feeds — a large share\nof it lives in SAP BW, behind its own extraction model and semantics. Standing\nup a separate pipeline for it would mean two sets of transformation rules, two\nplaces for a definition to drift, and two things to maintain.\n\nThe work here was to bring SAP BW in as *another source* on the existing\nmedallion pipeline rather than as a parallel system.",
+          "score": 0.3801
+        },
+        {
+          "sourceFile": "knowledge/projects/sap-bw-data-integration.md",
+          "heading": "Key decisions",
+          "text": "**One pipeline, many sources.** The defining decision: SAP BW is onboarded as a\nsource feed into the existing bronze layer rather than getting its own parallel\npipeline. Transformation logic, curation rules, and the reporting layer are\nshared, so a business definition lives in exactly one place.\n\n**Conform to the shared schema in silver.** SAP BW's native structures are\nabsorbed and aligned at the silver stage, which is what lets everything\ndownstream stay source-agnostic.\n\n**Bronze stays raw for SAP BW too.** The same append-only, unmodified landing\nrule applies, preserving the original extracts for lineage and reprocessing.",
+          "score": 0.3767
+        },
+        {
+          "sourceFile": "knowledge/projects/sap-bw-data-integration.md",
+          "heading": "Architecture",
+          "text": "Five stages sharing the same Fabric medallion pipeline used by the\n[Commodity Intelligence Platform](./commodity-intelligence-platform.md). These\nstage descriptions are migrated verbatim from the interactive pipeline diagram on\nthe previous site.\n\n**1. SAP BW Source** *(icon: Server)*\n`SAP BW` acts as the upstream enterprise source system, supplying the data this\npipeline extracts and feeds into the same Fabric-based medallion architecture\nused across the platform.\n\n**2. Bronze — Raw Ingest** *(icon: Layers)*\nData extracted from SAP BW lands in the `bronze` layer as raw, unmodified\nrecords — the same shared landing zone used by the platform's other source\nfeeds.\n\n**3. Silver — Transformed** *(icon: Filter)*\nRaw SAP BW extracts are transformed and conformed into a consistent schema in\nthe `silver` layer, aligning them with the rest of the medallion pipeline.\n\n**4. Gold — Curated** *(icon: Gem)*\nTransformed data is curated into business-ready tables in the `gold` layer, ready\nto feed downstream consumers.\n\n**5. Downstream Reporting** *(icon: BarChart3, status: active)*\nGold-layer data feeds downstream reporting — the same shared pipeline used by the\nplatform's other dashboards.",
+          "score": 0.3652
+        },
+        {
+          "sourceFile": "knowledge/projects/sap-bw-data-integration.md",
+          "heading": "Challenges",
+          "text": "**SAP BW's extraction model is its own discipline.** Getting data out of BW\nfaithfully — with its InfoProviders, hierarchies, and extractor semantics —\nis a different problem from reading a flat external feed, and the fidelity of\neverything downstream depends on it.\n\n**Conforming enterprise semantics into a shared schema.** SAP BW carries its own\nnaming and modeling conventions; reconciling them with the schema used by the\nplatform's other sources is the substance of the bronze → silver transformation.\n\n**Sharing a pipeline means shared blast radius.** The benefit of one medallion\npipeline is one set of rules; the cost is that a change made for SAP BW has to\nnot break the existing sources running through the same layers.",
+          "score": 0.3623
+        }
+      ],
+      "tools": [
+        "listProjects"
+      ],
+      "toolResults": [
+        {
+          "tool": "listProjects",
+          "data": {
+            "count": 6,
+            "projects": [
+              {
+                "slug": "ai-causal-intelligence-system",
+                "title": "AI Causal Intelligence System",
+                "oneLiner": "Built an uplift-based targeting system using causal inference on 100K+ user A/B simulation data to identify high-impact segments and optimize budget allocation, simulating $684K+ incremental revenue.",
+                "skills": [
+                  "Causal Inference",
+                  "Uplift Modeling",
+                  "A/B Testing",
+                  "Predictive Modeling",
+                  "Data Analytics"
+                ]
+              },
+              {
+                "slug": "commodity-intelligence-platform",
+                "title": "Commodity Intelligence Platform",
+                "oneLiner": "An automated pipeline that extracts raw commodity/market data, processes it through a Microsoft Fabric medallion architecture (bronze → silver → gold), and surfaces it in Direct Lake mode Power BI dashboards for near-real-time decision-making.",
+                "skills": [
+                  "Data Engineering",
+                  "Medallion Architecture",
+                  "ETL",
+                  "Dashboarding",
+                  "Data Modeling"
+                ]
+              },
+              {
+                "slug": "customer-segmentation-churn-prediction",
+                "title": "AI-Enabled Customer Segmentation & Churn Prediction System",
+                "oneLiner": "Developed predictive models using EDA and behavioral analytics on 100K+ customer records to identify churn risk and enable next-best-action recommendations, improving targeted retention by 12%.",
+                "skills": [
+                  "Predictive Modeling",
+                  "EDA",
+                  "Classification",
+                  "Clustering",
+                  "Behavioral Analytics"
+                ]
+              },
+              {
+                "slug": "parcelpal-route-optimization",
+                "title": "ParcelPal – Route Optimization",
+                "oneLiner": "Built a delivery route optimizer with Dijkstra’s Algorithm, improving efficiency and reducing operational costs.",
+                "skills": [
+                  "Algorithms",
+                  "Graph Search",
+                  "Full-Stack Development",
+                  "REST API Design"
+                ]
+              },
+              {
+                "slug": "sap-bw-data-integration",
+                "title": "SAP BW data integration",
+                "oneLiner": "Integrates SAP BW as a source system into the same Fabric-based pipeline, handling extraction and transformation into the medallion layers feeding downstream reporting.",
+                "skills": [
+                  "Data Engineering",
+                  "Enterprise System Integration",
+                  "Medallion Architecture",
+                  "ETL"
+                ]
+              },
+              {
+                "slug": "supplysightai-agentic-supply-chain-intelligence",
+                "title": "SupplySightAI – Agentic Supply Chain Intelligence",
+                "oneLiner": "Built an agentic AI platform that autonomously analyzes supply chain data, detects risks, explains root causes, forecasts disruptions, and recommends prioritized actions.",
+                "skills": [
+                  "Multi-Agent AI",
+                  "Agentic Workflows",
+                  "Machine Learning",
+                  "Forecasting",
+                  "Root Cause Analysis",
+                  "Data Analytics"
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "latencyMs": 1396,
+      "usage": {
+        "input": 3400,
+        "output": 405
+      },
+      "intent": "experience",
+      "confidence": 0.95,
+      "id": "sap-01",
+      "question": "Has he worked with SAP?",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/sap-bw-data-integration.md",
+      "retrievalHit": true,
+      "sectionHit": null,
+      "behaviourPass": true,
+      "behaviourNote": "answered",
+      "grounded": true,
+      "judgeVerdict": "YES",
+      "judgeReason": "All factual claims in the answer are directly supported by the provided context, including the attribution to Yash which is explicitly permitted by the evaluation rules."
+    },
+    {
+      "answer": "SAP BW was onboarded into the existing Fabric medallion pipeline rather than getting its own stack because it kept the data‑engineering footprint smaller and avoided duplicate logic.  \n- The decision was to treat SAP BW as another source feed in the same bronze layer, so the same transformation rules, curation logic, and reporting layer could be reused for all sources.  \n- This meant a single set of business definitions lived in one place, reducing the risk of drift and simplifying maintenance.  \n- By keeping the pipeline shared, any change for SAP BW had to be evaluated against the same rules that already served other feeds, but it also avoided having two parallel pipelines that would need separate monitoring, lineage, and updates.  \n\n(From the SAP BW data integration project: Problem, Key decisions, Challenges, and Impact sections.)",
+      "chunks": [
+        {
+          "sourceFile": "knowledge/projects/sap-bw-data-integration.md",
+          "heading": "Problem",
+          "text": "Enterprise reporting data doesn't only come from external feeds — a large share\nof it lives in SAP BW, behind its own extraction model and semantics. Standing\nup a separate pipeline for it would mean two sets of transformation rules, two\nplaces for a definition to drift, and two things to maintain.\n\nThe work here was to bring SAP BW in as *another source* on the existing\nmedallion pipeline rather than as a parallel system.",
+          "score": 0.7387
+        },
+        {
+          "sourceFile": "knowledge/projects/sap-bw-data-integration.md",
+          "heading": "Key decisions",
+          "text": "**One pipeline, many sources.** The defining decision: SAP BW is onboarded as a\nsource feed into the existing bronze layer rather than getting its own parallel\npipeline. Transformation logic, curation rules, and the reporting layer are\nshared, so a business definition lives in exactly one place.\n\n**Conform to the shared schema in silver.** SAP BW's native structures are\nabsorbed and aligned at the silver stage, which is what lets everything\ndownstream stay source-agnostic.\n\n**Bronze stays raw for SAP BW too.** The same append-only, unmodified landing\nrule applies, preserving the original extracts for lineage and reprocessing.",
+          "score": 0.7365
+        },
+        {
+          "sourceFile": "knowledge/projects/sap-bw-data-integration.md",
+          "heading": "Challenges",
+          "text": "**SAP BW's extraction model is its own discipline.** Getting data out of BW\nfaithfully — with its InfoProviders, hierarchies, and extractor semantics —\nis a different problem from reading a flat external feed, and the fidelity of\neverything downstream depends on it.\n\n**Conforming enterprise semantics into a shared schema.** SAP BW carries its own\nnaming and modeling conventions; reconciling them with the schema used by the\nplatform's other sources is the substance of the bronze → silver transformation.\n\n**Sharing a pipeline means shared blast radius.** The benefit of one medallion\npipeline is one set of rules; the cost is that a change made for SAP BW has to\nnot break the existing sources running through the same layers.",
+          "score": 0.7041
+        },
+        {
+          "sourceFile": "knowledge/projects/sap-bw-data-integration.md",
+          "heading": "Impact",
+          "text": "Brought an enterprise SAP BW source into the existing Fabric medallion pipeline\nwithout standing up a parallel stack, so downstream reporting consumes SAP BW\ndata through the same curated gold layer as every other source.",
+          "score": 0.6865
+        },
+        {
+          "sourceFile": "knowledge/projects/sap-bw-data-integration.md",
+          "heading": "Overview",
+          "text": "Integrates SAP BW as a source system into the same Fabric-based pipeline,\nhandling extraction and transformation into the medallion layers feeding\ndownstream reporting.",
+          "score": 0.6683
+        },
+        {
+          "sourceFile": "knowledge/projects/sap-bw-data-integration.md",
+          "heading": "Architecture",
+          "text": "Five stages sharing the same Fabric medallion pipeline used by the\n[Commodity Intelligence Platform](./commodity-intelligence-platform.md). These\nstage descriptions are migrated verbatim from the interactive pipeline diagram on\nthe previous site.\n\n**1. SAP BW Source** *(icon: Server)*\n`SAP BW` acts as the upstream enterprise source system, supplying the data this\npipeline extracts and feeds into the same Fabric-based medallion architecture\nused across the platform.\n\n**2. Bronze — Raw Ingest** *(icon: Layers)*\nData extracted from SAP BW lands in the `bronze` layer as raw, unmodified\nrecords — the same shared landing zone used by the platform's other source\nfeeds.\n\n**3. Silver — Transformed** *(icon: Filter)*\nRaw SAP BW extracts are transformed and conformed into a consistent schema in\nthe `silver` layer, aligning them with the rest of the medallion pipeline.\n\n**4. Gold — Curated** *(icon: Gem)*\nTransformed data is curated into business-ready tables in the `gold` layer, ready\nto feed downstream consumers.\n\n**5. Downstream Reporting** *(icon: BarChart3, status: active)*\nGold-layer data feeds downstream reporting — the same shared pipeline used by the\nplatform's other dashboards.",
+          "score": 0.6612
+        }
+      ],
+      "tools": [
+        "listProjects"
+      ],
+      "toolResults": [
+        {
+          "tool": "listProjects",
+          "data": {
+            "count": 6,
+            "projects": [
+              {
+                "slug": "ai-causal-intelligence-system",
+                "title": "AI Causal Intelligence System",
+                "oneLiner": "Built an uplift-based targeting system using causal inference on 100K+ user A/B simulation data to identify high-impact segments and optimize budget allocation, simulating $684K+ incremental revenue.",
+                "skills": [
+                  "Causal Inference",
+                  "Uplift Modeling",
+                  "A/B Testing",
+                  "Predictive Modeling",
+                  "Data Analytics"
+                ]
+              },
+              {
+                "slug": "commodity-intelligence-platform",
+                "title": "Commodity Intelligence Platform",
+                "oneLiner": "An automated pipeline that extracts raw commodity/market data, processes it through a Microsoft Fabric medallion architecture (bronze → silver → gold), and surfaces it in Direct Lake mode Power BI dashboards for near-real-time decision-making.",
+                "skills": [
+                  "Data Engineering",
+                  "Medallion Architecture",
+                  "ETL",
+                  "Dashboarding",
+                  "Data Modeling"
+                ]
+              },
+              {
+                "slug": "customer-segmentation-churn-prediction",
+                "title": "AI-Enabled Customer Segmentation & Churn Prediction System",
+                "oneLiner": "Developed predictive models using EDA and behavioral analytics on 100K+ customer records to identify churn risk and enable next-best-action recommendations, improving targeted retention by 12%.",
+                "skills": [
+                  "Predictive Modeling",
+                  "EDA",
+                  "Classification",
+                  "Clustering",
+                  "Behavioral Analytics"
+                ]
+              },
+              {
+                "slug": "parcelpal-route-optimization",
+                "title": "ParcelPal – Route Optimization",
+                "oneLiner": "Built a delivery route optimizer with Dijkstra’s Algorithm, improving efficiency and reducing operational costs.",
+                "skills": [
+                  "Algorithms",
+                  "Graph Search",
+                  "Full-Stack Development",
+                  "REST API Design"
+                ]
+              },
+              {
+                "slug": "sap-bw-data-integration",
+                "title": "SAP BW data integration",
+                "oneLiner": "Integrates SAP BW as a source system into the same Fabric-based pipeline, handling extraction and transformation into the medallion layers feeding downstream reporting.",
+                "skills": [
+                  "Data Engineering",
+                  "Enterprise System Integration",
+                  "Medallion Architecture",
+                  "ETL"
+                ]
+              },
+              {
+                "slug": "supplysightai-agentic-supply-chain-intelligence",
+                "title": "SupplySightAI – Agentic Supply Chain Intelligence",
+                "oneLiner": "Built an agentic AI platform that autonomously analyzes supply chain data, detects risks, explains root causes, forecasts disruptions, and recommends prioritized actions.",
+                "skills": [
+                  "Multi-Agent AI",
+                  "Agentic Workflows",
+                  "Machine Learning",
+                  "Forecasting",
+                  "Root Cause Analysis",
+                  "Data Analytics"
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "latencyMs": 1752,
+      "usage": {
+        "input": 3420,
+        "output": 635
+      },
+      "intent": "architecture_meta",
+      "confidence": 0.95,
+      "id": "sap-02",
+      "question": "Why was SAP BW added to the existing pipeline instead of building a separate one?",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/sap-bw-data-integration.md",
+      "expectedSection": "Key decisions",
+      "retrievalHit": true,
+      "sectionHit": true,
+      "behaviourPass": true,
+      "behaviourNote": "answered",
+      "grounded": null,
+      "judgeVerdict": "PARSE_ERROR",
+      "judgeReason": "\n<think>\nHere's a thinking process:\n\n1.  **Analyze the Request:**\n   - Role: Strict grounding judge.\n   - Task: Evaluate if every factual claim in the ANSWER is"
+    },
+    {
+      "answer": "SupplySightAI is an agentic AI platform that turns supply‑chain monitoring from a reactive dashboard into an autonomous analysis loop. It ingests operational data, detects risks, explains root causes, forecasts disruptions, and produces a prioritized list of actions for the user to act on.  \n\nKey design choices include:\n\n* **Multi‑agent pipeline** – separate agents handle analysis, risk detection, root‑cause explanation, forecasting, and recommendation, making each step narrow and traceable.  \n* **Classical ML for numeric work** – scikit‑learn and Pandas perform anomaly detection and forecasting, while the agent layer orchestrates reasoning and explanation.  \n* **Prioritized recommendations** – the system ranks risks instead of just listing them, so the most critical actions surface first.  \n* **Streamlit UI** – a lightweight front‑end lets users drill from the ranked recommendations back to the underlying evidence.  \n\nThe platform’s goal is to surface ranked, explained actions that help supply‑chain teams focus on the most urgent issues before they become problems. (from `projects/supplysightai-agentic-supply-chain-intelligence.md` sections: Architecture, Decisions, Impact)",
+      "chunks": [
+        {
+          "sourceFile": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+          "heading": "Problem",
+          "text": "Supply chain teams sit on more operational data than they can read. The signal\nthat matters — a supplier slipping, a lane degrading, a stock position about to\ngo negative — is buried in tables that only get looked at after something has\nalready broken. The usual answer is a dashboard, but a dashboard only shows you\nwhat you already thought to ask for. It doesn't tell you *why* a number moved,\nwhat's likely to happen next, or which of the fifteen things now on fire you\nshould handle first.\n\nSupplySightAI was built to close that gap: instead of a human driving the\nanalysis, agents drive it and hand the human a ranked set of actions.",
+          "score": 0.5716
+        },
+        {
+          "sourceFile": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+          "heading": "Overview",
+          "text": "Built an agentic AI platform that autonomously analyzes supply chain data,\ndetects risks, explains root causes, forecasts disruptions, and recommends\nprioritized actions.",
+          "score": 0.5683
+        },
+        {
+          "sourceFile": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+          "heading": "Impact",
+          "text": "The platform turns supply chain monitoring from a reactive dashboard-reading\nexercise into an autonomous analysis loop that surfaces ranked, explained\nactions.",
+          "score": 0.5291
+        },
+        {
+          "sourceFile": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+          "heading": "Key decisions",
+          "text": "**Agents over a single prompt.** Splitting analysis, risk, root cause,\nforecasting, and recommendation into separate agents means each stage has a\nnarrow, checkable job. It also means a failure is localizable — a bad\nrecommendation can be traced to the specific upstream agent that produced the\nfaulty input.\n\n**Classical ML for the numbers, agents for the reasoning.** Forecasting and\nanomaly detection run on scikit-learn and Pandas rather than being asked of a\nlanguage model. The agentic layer orchestrates and explains; it doesn't do\narithmetic it can't be held to.\n\n**Recommendations must be prioritized, not just produced.** An unranked list of\ntwelve risks is the same problem as the original dashboard. Ranking is treated\nas a first-class output, not a presentation detail.\n\n**Streamlit for the interface.** Chosen to keep the surface area small and the\niteration loop fast — the interesting work is the agent system, not the UI\nframework.",
+          "score": 0.4948
+        },
+        {
+          "sourceFile": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+          "heading": "Architecture",
+          "text": "The system is organized as a **multi-agent pipeline**, where each agent owns one\nstage of the reasoning chain rather than one monolithic model trying to do\neverything:\n\n- **Analysis agent** — ingests supply chain data and computes the descriptive\n  layer using Pandas: current state, deltas, and anomalies against baseline.\n- **Risk detection agent** — flags where the data crosses into risk territory,\n  turning raw anomalies into named risks.\n- **Root cause agent** — explains *why* a flagged risk appeared, tracing it back\n  through the contributing dimensions rather than just reporting the symptom.\n- **Forecasting agent** — projects disruption forward using scikit-learn models,\n  so the output is anticipatory rather than purely retrospective.\n- **Recommendation agent** — ranks the resulting findings into a prioritized\n  action list, which is what the user actually sees first.\n\n**Streamlit** is the delivery layer: it hosts the interactive front end where a\nuser inspects the agents' findings and drills from the recommendation back down\nto the evidence.",
+          "score": 0.4924
+        },
+        {
+          "sourceFile": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+          "heading": "Challenges",
+          "text": "**Root cause is harder than detection.** Detecting that a metric moved is\nmechanical; attributing it correctly is not. The explanation layer has to\ndistinguish a genuine driver from a correlated bystander, and a confidently\nwrong root cause is worse than no root cause at all.\n\n**Keeping agents grounded in the data.** Every claim an agent makes has to trace\nback to a row it actually read. Without that constraint, an explanation layer\ndrifts into plausible-sounding narrative.\n\n**Ranking across incomparable risks.** Prioritization requires putting a\nforecast-driven risk and a currently-live anomaly on the same scale, which is a\njudgment call encoded in the system rather than something the data hands you.",
+          "score": 0.4548
+        }
+      ],
+      "tools": [
+        "getProject"
+      ],
+      "toolResults": [
+        {
+          "tool": "getProject",
+          "data": {
+            "found": true,
+            "project": {
+              "slug": "supplysightai-agentic-supply-chain-intelligence",
+              "title": "SupplySightAI – Agentic Supply Chain Intelligence",
+              "oneLiner": "Built an agentic AI platform that autonomously analyzes supply chain data, detects risks, explains root causes, forecasts disruptions, and recommends prioritized actions.",
+              "skills": [
+                "Multi-Agent AI",
+                "Agentic Workflows",
+                "Machine Learning",
+                "Forecasting",
+                "Root Cause Analysis",
+                "Data Analytics"
+              ],
+              "stack": [
+                "Python",
+                "Pandas",
+                "Scikit-learn",
+                "Streamlit",
+                "Multi-Agent AI"
+              ],
+              "timeframe": "",
+              "links": {
+                "repo": "",
+                "demo": "",
+                "writeup": ""
+              },
+              "sections": {
+                "problem": "Supply chain teams sit on more operational data than they can read. The signal\nthat matters — a supplier slipping, a lane degrading, a stock position about to\ngo negative — is buried in tables that only get looked at after something has\nalready broken. The usual answer is a dashboard, but a dashboard only shows you\nwhat you already thought to ask for. It doesn't tell you *why* a number moved,\nwhat's likely to happen next, or which of the fifteen things now on fire you\nshould handle first.\n\nSupplySightAI was built to close that gap: instead of a human driving the\nanalysis, agents drive it and hand the human a ranked set of actions.",
+                "architecture": "The system is organized as a **multi-agent pipeline**, where each agent owns one\nstage of the reasoning chain rather than one monolithic model trying to do\neverything:\n\n- **Analysis agent** — ingests supply chain data and computes the descriptive\n  layer using Pandas: current state, deltas, and anomalies against baseline.\n- **Risk detection agent** — flags where the data crosses into risk territory,\n  turning raw anomalies into named risks.\n- **Root cause agent** — explains *why* a flagged risk appeared, tracing it back\n  through the contributing dimensions rather than just reporting the symptom.\n- **Forecasting agent** — projects disruption forward using scikit-learn models,\n  so the output is anticipatory rather than purely retrospective.\n- **Recommendation agent** — ranks the resulting findings into a prioritized\n  action list, which is what the user actually sees first.\n\n**Streamlit** is the delivery layer: it hosts the interactive front end where a\nuser inspects the agents' findings and drills from the recommendation back down\nto the evidence.",
+                "decisions": "**Agents over a single prompt.** Splitting analysis, risk, root cause,\nforecasting, and recommendation into separate agents means each stage has a\nnarrow, checkable job. It also means a failure is localizable — a bad\nrecommendation can be traced to the specific upstream agent that produced the\nfaulty input.\n\n**Classical ML for the numbers, agents for the reasoning.** Forecasting and\nanomaly detection run on scikit-learn and Pandas rather than being asked of a\nlanguage model. The agentic layer orchestrates and explains; it doesn't do\narithmetic it can't be held to.\n\n**Recommendations must be prioritized, not just produced.** An unranked list of\ntwelve risks is the same problem as the original dashboard. Ranking is treated\nas a first-class output, not a presentation detail.\n\n**Streamlit for the interface.** Chosen to keep the surface area small and the\niteration loop fast — the interesting work is the agent system, not the UI\nframework.",
+                "challenges": "**Root cause is harder than detection.** Detecting that a metric moved is\nmechanical; attributing it correctly is not. The explanation layer has to\ndistinguish a genuine driver from a correlated bystander, and a confidently\nwrong root cause is worse than no root cause at all.\n\n**Keeping agents grounded in the data.** Every claim an agent makes has to trace\nback to a row it actually read. Without that constraint, an explanation layer\ndrifts into plausible-sounding narrative.\n\n**Ranking across incomparable risks.** Prioritization requires putting a\nforecast-driven risk and a currently-live anomaly on the same scale, which is a\njudgment call encoded in the system rather than something the data hands you.",
+                "impact": "The platform turns supply chain monitoring from a reactive dashboard-reading\nexercise into an autonomous analysis loop that surfaces ranked, explained\nactions."
+              },
+              "sourceFile": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+              "missingSections": []
+            }
+          }
+        }
+      ],
+      "latencyMs": 1875,
+      "usage": {
+        "input": 3952,
+        "output": 401
+      },
+      "intent": "project_deep_dive",
+      "entitySlug": "supplysightai-agentic-supply-chain-intelligence",
+      "confidence": 0.95,
+      "id": "supplysight-01",
+      "question": "Tell me about SupplySightAI",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+      "retrievalHit": true,
+      "sectionHit": null,
+      "behaviourPass": true,
+      "behaviourNote": "answered",
+      "grounded": true,
+      "judgeVerdict": "YES",
+      "judgeReason": "All factual claims in the answer are directly supported by the provided context."
+    },
+    {
+      "answer": "SupplySightAI split the workflow into a chain of small, purpose‑specific agents instead of feeding all of the logic into one large prompt for a language model. The main reasons are:\n\n* **Narrow, checkable jobs** – each agent (analysis, risk detection, root cause, forecasting, recommendation) has a single, well‑defined responsibility, so its output can be validated against the data it read.  \n* **Localizable failures** – if a recommendation is wrong, you can trace the fault back to the particular upstream agent that produced the bad input, making debugging and iteration easier.  \n\nThese design choices were explicitly noted as a key decision in the project documentation. *(from the SupplySightAI – Agentic Supply Chain Intelligence “Key decisions” section)*",
+      "chunks": [
+        {
+          "sourceFile": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+          "heading": "Overview",
+          "text": "Built an agentic AI platform that autonomously analyzes supply chain data,\ndetects risks, explains root causes, forecasts disruptions, and recommends\nprioritized actions.",
+          "score": 0.5981
+        },
+        {
+          "sourceFile": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+          "heading": "Problem",
+          "text": "Supply chain teams sit on more operational data than they can read. The signal\nthat matters — a supplier slipping, a lane degrading, a stock position about to\ngo negative — is buried in tables that only get looked at after something has\nalready broken. The usual answer is a dashboard, but a dashboard only shows you\nwhat you already thought to ask for. It doesn't tell you *why* a number moved,\nwhat's likely to happen next, or which of the fifteen things now on fire you\nshould handle first.\n\nSupplySightAI was built to close that gap: instead of a human driving the\nanalysis, agents drive it and hand the human a ranked set of actions.",
+          "score": 0.5519
+        },
+        {
+          "sourceFile": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+          "heading": "Architecture",
+          "text": "The system is organized as a **multi-agent pipeline**, where each agent owns one\nstage of the reasoning chain rather than one monolithic model trying to do\neverything:\n\n- **Analysis agent** — ingests supply chain data and computes the descriptive\n  layer using Pandas: current state, deltas, and anomalies against baseline.\n- **Risk detection agent** — flags where the data crosses into risk territory,\n  turning raw anomalies into named risks.\n- **Root cause agent** — explains *why* a flagged risk appeared, tracing it back\n  through the contributing dimensions rather than just reporting the symptom.\n- **Forecasting agent** — projects disruption forward using scikit-learn models,\n  so the output is anticipatory rather than purely retrospective.\n- **Recommendation agent** — ranks the resulting findings into a prioritized\n  action list, which is what the user actually sees first.\n\n**Streamlit** is the delivery layer: it hosts the interactive front end where a\nuser inspects the agents' findings and drills from the recommendation back down\nto the evidence.",
+          "score": 0.5376
+        },
+        {
+          "sourceFile": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+          "heading": "Impact",
+          "text": "The platform turns supply chain monitoring from a reactive dashboard-reading\nexercise into an autonomous analysis loop that surfaces ranked, explained\nactions.",
+          "score": 0.5216
+        },
+        {
+          "sourceFile": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+          "heading": "Key decisions",
+          "text": "**Agents over a single prompt.** Splitting analysis, risk, root cause,\nforecasting, and recommendation into separate agents means each stage has a\nnarrow, checkable job. It also means a failure is localizable — a bad\nrecommendation can be traced to the specific upstream agent that produced the\nfaulty input.\n\n**Classical ML for the numbers, agents for the reasoning.** Forecasting and\nanomaly detection run on scikit-learn and Pandas rather than being asked of a\nlanguage model. The agentic layer orchestrates and explains; it doesn't do\narithmetic it can't be held to.\n\n**Recommendations must be prioritized, not just produced.** An unranked list of\ntwelve risks is the same problem as the original dashboard. Ranking is treated\nas a first-class output, not a presentation detail.\n\n**Streamlit for the interface.** Chosen to keep the surface area small and the\niteration loop fast — the interesting work is the agent system, not the UI\nframework.",
+          "score": 0.5118
+        },
+        {
+          "sourceFile": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+          "heading": "Challenges",
+          "text": "**Root cause is harder than detection.** Detecting that a metric moved is\nmechanical; attributing it correctly is not. The explanation layer has to\ndistinguish a genuine driver from a correlated bystander, and a confidently\nwrong root cause is worse than no root cause at all.\n\n**Keeping agents grounded in the data.** Every claim an agent makes has to trace\nback to a row it actually read. Without that constraint, an explanation layer\ndrifts into plausible-sounding narrative.\n\n**Ranking across incomparable risks.** Prioritization requires putting a\nforecast-driven risk and a currently-live anomaly on the same scale, which is a\njudgment call encoded in the system rather than something the data hands you.",
+          "score": 0.4766
+        }
+      ],
+      "tools": [
+        "getProject"
+      ],
+      "toolResults": [
+        {
+          "tool": "getProject",
+          "data": {
+            "found": true,
+            "project": {
+              "slug": "supplysightai-agentic-supply-chain-intelligence",
+              "title": "SupplySightAI – Agentic Supply Chain Intelligence",
+              "oneLiner": "Built an agentic AI platform that autonomously analyzes supply chain data, detects risks, explains root causes, forecasts disruptions, and recommends prioritized actions.",
+              "skills": [
+                "Multi-Agent AI",
+                "Agentic Workflows",
+                "Machine Learning",
+                "Forecasting",
+                "Root Cause Analysis",
+                "Data Analytics"
+              ],
+              "stack": [
+                "Python",
+                "Pandas",
+                "Scikit-learn",
+                "Streamlit",
+                "Multi-Agent AI"
+              ],
+              "timeframe": "",
+              "links": {
+                "repo": "",
+                "demo": "",
+                "writeup": ""
+              },
+              "sections": {
+                "problem": "Supply chain teams sit on more operational data than they can read. The signal\nthat matters — a supplier slipping, a lane degrading, a stock position about to\ngo negative — is buried in tables that only get looked at after something has\nalready broken. The usual answer is a dashboard, but a dashboard only shows you\nwhat you already thought to ask for. It doesn't tell you *why* a number moved,\nwhat's likely to happen next, or which of the fifteen things now on fire you\nshould handle first.\n\nSupplySightAI was built to close that gap: instead of a human driving the\nanalysis, agents drive it and hand the human a ranked set of actions.",
+                "architecture": "The system is organized as a **multi-agent pipeline**, where each agent owns one\nstage of the reasoning chain rather than one monolithic model trying to do\neverything:\n\n- **Analysis agent** — ingests supply chain data and computes the descriptive\n  layer using Pandas: current state, deltas, and anomalies against baseline.\n- **Risk detection agent** — flags where the data crosses into risk territory,\n  turning raw anomalies into named risks.\n- **Root cause agent** — explains *why* a flagged risk appeared, tracing it back\n  through the contributing dimensions rather than just reporting the symptom.\n- **Forecasting agent** — projects disruption forward using scikit-learn models,\n  so the output is anticipatory rather than purely retrospective.\n- **Recommendation agent** — ranks the resulting findings into a prioritized\n  action list, which is what the user actually sees first.\n\n**Streamlit** is the delivery layer: it hosts the interactive front end where a\nuser inspects the agents' findings and drills from the recommendation back down\nto the evidence.",
+                "decisions": "**Agents over a single prompt.** Splitting analysis, risk, root cause,\nforecasting, and recommendation into separate agents means each stage has a\nnarrow, checkable job. It also means a failure is localizable — a bad\nrecommendation can be traced to the specific upstream agent that produced the\nfaulty input.\n\n**Classical ML for the numbers, agents for the reasoning.** Forecasting and\nanomaly detection run on scikit-learn and Pandas rather than being asked of a\nlanguage model. The agentic layer orchestrates and explains; it doesn't do\narithmetic it can't be held to.\n\n**Recommendations must be prioritized, not just produced.** An unranked list of\ntwelve risks is the same problem as the original dashboard. Ranking is treated\nas a first-class output, not a presentation detail.\n\n**Streamlit for the interface.** Chosen to keep the surface area small and the\niteration loop fast — the interesting work is the agent system, not the UI\nframework.",
+                "challenges": "**Root cause is harder than detection.** Detecting that a metric moved is\nmechanical; attributing it correctly is not. The explanation layer has to\ndistinguish a genuine driver from a correlated bystander, and a confidently\nwrong root cause is worse than no root cause at all.\n\n**Keeping agents grounded in the data.** Every claim an agent makes has to trace\nback to a row it actually read. Without that constraint, an explanation layer\ndrifts into plausible-sounding narrative.\n\n**Ranking across incomparable risks.** Prioritization requires putting a\nforecast-driven risk and a currently-live anomaly on the same scale, which is a\njudgment call encoded in the system rather than something the data hands you.",
+                "impact": "The platform turns supply chain monitoring from a reactive dashboard-reading\nexercise into an autonomous analysis loop that surfaces ranked, explained\nactions."
+              },
+              "sourceFile": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+              "missingSections": []
+            }
+          }
+        }
+      ],
+      "latencyMs": 1716,
+      "usage": {
+        "input": 3966,
+        "output": 558
+      },
+      "intent": "architecture_meta",
+      "entitySlug": "supplysightai-agentic-supply-chain-intelligence",
+      "confidence": 0.95,
+      "id": "supplysight-02",
+      "question": "Why did SupplySightAI use multiple agents instead of one prompt?",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+      "expectedSection": "Key decisions",
+      "retrievalHit": true,
+      "sectionHit": true,
+      "behaviourPass": true,
+      "behaviourNote": "answered",
+      "grounded": true,
+      "judgeVerdict": "YES",
+      "judgeReason": "Every factual claim in the answer is directly supported by the provided context, particularly the 'Key decisions' section."
+    },
+    {
+      "answer": "",
+      "chunks": [],
+      "tools": [],
+      "toolResults": [],
+      "latencyMs": 243651,
+      "usage": {
+        "input": 0,
+        "output": 0
+      },
+      "intent": "out_of_scope",
+      "entitySlug": "supplysightai-agentic-supply-chain-intelligence",
+      "confidence": 0.3,
+      "error": "429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01m1vmpa2sedavc3mtzk0re8wf` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199313, Requested 1409. Please try again in 5m11.904s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}}",
+      "id": "supplysight-03",
+      "question": "What was hard about building the supply chain agent system?",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+      "expectedSection": "Challenges",
+      "retrievalHit": false,
+      "sectionHit": false,
+      "behaviourPass": null,
+      "behaviourNote": "run error: 429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in or",
+      "grounded": null,
+      "judgeVerdict": "SKIP",
+      "judgeReason": "no answer produced"
+    },
+    {
+      "answer": "",
+      "chunks": [],
+      "tools": [],
+      "toolResults": [],
+      "latencyMs": 242877,
+      "usage": {
+        "input": 0,
+        "output": 0
+      },
+      "intent": "out_of_scope",
+      "confidence": 0.3,
+      "entitySlug": "parcelpal-route-optimization",
+      "error": "429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01m1vmpa2sedavc3mtzk0re8wf` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199477, Requested 1775. Please try again in 9m0.864s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}}",
+      "id": "parcelpal-01",
+      "question": "What algorithm did ParcelPal use for routing?",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/parcelpal-route-optimization.md",
+      "retrievalHit": false,
+      "sectionHit": null,
+      "behaviourPass": null,
+      "behaviourNote": "run error: 429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in or",
+      "grounded": null,
+      "judgeVerdict": "SKIP",
+      "judgeReason": "no answer produced"
+    },
+    {
+      "answer": "",
+      "chunks": [],
+      "tools": [],
+      "toolResults": [],
+      "latencyMs": 243332,
+      "usage": {
+        "input": 0,
+        "output": 0
+      },
+      "intent": "out_of_scope",
+      "confidence": 0.3,
+      "entitySlug": "parcelpal-route-optimization",
+      "error": "429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01m1vmpa2sedavc3mtzk0re8wf` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199406, Requested 1832. Please try again in 8m54.816s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}}",
+      "id": "parcelpal-02",
+      "question": "What stack was ParcelPal built on?",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/parcelpal-route-optimization.md",
+      "retrievalHit": false,
+      "sectionHit": null,
+      "behaviourPass": null,
+      "behaviourNote": "run error: 429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in or",
+      "grounded": null,
+      "judgeVerdict": "SKIP",
+      "judgeReason": "no answer produced"
+    },
+    {
+      "answer": "",
+      "chunks": [],
+      "tools": [],
+      "toolResults": [],
+      "latencyMs": 243309,
+      "usage": {
+        "input": 0,
+        "output": 0
+      },
+      "intent": "out_of_scope",
+      "confidence": 0.3,
+      "entitySlug": "customer-segmentation-churn-prediction",
+      "error": "429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01m1vmpa2sedavc3mtzk0re8wf` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199649, Requested 1729. Please try again in 9m55.296s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}}",
+      "id": "churn-01",
+      "question": "What results did the churn prediction project achieve?",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/customer-segmentation-churn-prediction.md",
+      "expectedSection": "Impact",
+      "retrievalHit": false,
+      "sectionHit": false,
+      "behaviourPass": null,
+      "behaviourNote": "run error: 429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in or",
+      "grounded": null,
+      "judgeVerdict": "SKIP",
+      "judgeReason": "no answer produced"
+    },
+    {
+      "answer": "",
+      "chunks": [],
+      "tools": [],
+      "toolResults": [],
+      "latencyMs": 242696,
+      "usage": {
+        "input": 0,
+        "output": 0
+      },
+      "intent": "out_of_scope",
+      "confidence": 0.3,
+      "error": "429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01m1vmpa2sedavc3mtzk0re8wf` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199535, Requested 1720. Please try again in 9m2.159999999s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}}",
+      "id": "churn-02",
+      "question": "How did he approach customer segmentation?",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/customer-segmentation-churn-prediction.md",
+      "retrievalHit": false,
+      "sectionHit": null,
+      "behaviourPass": null,
+      "behaviourNote": "run error: 429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in or",
+      "grounded": null,
+      "judgeVerdict": "SKIP",
+      "judgeReason": "no answer produced"
+    },
+    {
+      "answer": "",
+      "chunks": [],
+      "tools": [],
+      "toolResults": [],
+      "latencyMs": 242829,
+      "usage": {
+        "input": 0,
+        "output": 0
+      },
+      "intent": "out_of_scope",
+      "confidence": 0.3,
+      "entitySlug": "ai-causal-intelligence-system",
+      "error": "429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01m1vmpa2sedavc3mtzk0re8wf` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199397, Requested 1461. Please try again in 6m10.656s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}}",
+      "id": "causal-01",
+      "question": "Tell me about the causal inference work",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/ai-causal-intelligence-system.md",
+      "retrievalHit": false,
+      "sectionHit": null,
+      "behaviourPass": null,
+      "behaviourNote": "run error: 429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in or",
+      "grounded": null,
+      "judgeVerdict": "SKIP",
+      "judgeReason": "no answer produced"
+    },
+    {
+      "answer": "",
+      "chunks": [],
+      "tools": [],
+      "toolResults": [],
+      "latencyMs": 242881,
+      "usage": {
+        "input": 0,
+        "output": 0
+      },
+      "intent": "out_of_scope",
+      "confidence": 0.3,
+      "error": "429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01m1vmpa2sedavc3mtzk0re8wf` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199528, Requested 1827. Please try again in 9m45.36s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}}",
+      "id": "causal-02",
+      "question": "Why model uplift instead of just predicting who will convert?",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/ai-causal-intelligence-system.md",
+      "expectedSection": "Key decisions",
+      "retrievalHit": false,
+      "sectionHit": false,
+      "behaviourPass": null,
+      "behaviourNote": "run error: 429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in or",
+      "grounded": null,
+      "judgeVerdict": "SKIP",
+      "judgeReason": "no answer produced"
+    },
+    {
+      "answer": "",
+      "chunks": [],
+      "tools": [],
+      "toolResults": [],
+      "latencyMs": 243245,
+      "usage": {
+        "input": 0,
+        "output": 0
+      },
+      "intent": "out_of_scope",
+      "confidence": 0.3,
+      "error": "429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01m1vmpa2sedavc3mtzk0re8wf` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199379, Requested 1817. Please try again in 8m36.672s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}}",
+      "id": "causal-03",
+      "question": "Is the $684K figure real revenue?",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/ai-causal-intelligence-system.md",
+      "expectedSection": "Impact",
+      "retrievalHit": false,
+      "sectionHit": false,
+      "behaviourPass": null,
+      "behaviourNote": "run error: 429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in or",
+      "grounded": null,
+      "judgeVerdict": "SKIP",
+      "judgeReason": "no answer produced"
+    },
+    {
+      "answer": "",
+      "chunks": [],
+      "tools": [],
+      "toolResults": [],
+      "latencyMs": 242709,
+      "usage": {
+        "input": 0,
+        "output": 0
+      },
+      "intent": "out_of_scope",
+      "confidence": 0.3,
+      "error": "429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01m1vmpa2sedavc3mtzk0re8wf` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199579, Requested 1461. Please try again in 7m29.28s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}}",
+      "id": "experience-01",
+      "question": "What did he do at Emerson?",
+      "mode": "answer",
+      "expectedSource": "knowledge/experience.md",
+      "expectedSection": "Graduate Software Engineer Trainee",
+      "retrievalHit": false,
+      "sectionHit": false,
+      "behaviourPass": null,
+      "behaviourNote": "run error: 429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in or",
+      "grounded": null,
+      "judgeVerdict": "SKIP",
+      "judgeReason": "no answer produced"
+    },
+    {
+      "answer": "",
+      "chunks": [],
+      "tools": [],
+      "toolResults": [],
+      "latencyMs": 242801,
+      "usage": {
+        "input": 0,
+        "output": 0
+      },
+      "intent": "out_of_scope",
+      "confidence": 0.3,
+      "error": "429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01m1vmpa2sedavc3mtzk0re8wf` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199706, Requested 1364. Please try again in 7m42.239999999s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}}",
+      "id": "experience-02",
+      "question": "What did he build during the Wizphys AI internship?",
+      "mode": "answer",
+      "expectedSource": "knowledge/experience.md",
+      "expectedSection": "Deep Learning Intern",
+      "retrievalHit": false,
+      "sectionHit": false,
+      "behaviourPass": null,
+      "behaviourNote": "run error: 429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in or",
+      "grounded": null,
+      "judgeVerdict": "SKIP",
+      "judgeReason": "no answer produced"
+    },
+    {
+      "answer": "",
+      "chunks": [
+        {
+          "sourceFile": "knowledge/skills.md",
+          "heading": "Applied AI & Enterprise Integration",
+          "text": "- Azure AI Search indexers (building and tuning search indexes for retrieval)\n- Copilot Studio integrations (building conversational agents on top of\n  enterprise data)\n- LLM failure benchmarking (systematic evaluation of where and why LLM outputs\n  fail)\n\n---",
+          "score": 0.3155
+        },
+        {
+          "sourceFile": "knowledge/skills.md",
+          "heading": "AI & Machine Learning",
+          "text": "- Machine Learning, NLP\n- LLMs (GPT, Claude-style models)\n- Prompt Engineering, Agentic Workflows\n- GenAI POC Development\n- AI API Integration, Workflow Automation",
+          "score": 0.2079
+        },
+        {
+          "sourceFile": "knowledge/skills.md",
+          "heading": "Product Skills",
+          "text": "- Product Strategy\n- Requirements Gathering\n- User Stories\n- Feature Prioritization\n- Experimentation",
+          "score": 0.2022
+        },
+        {
+          "sourceFile": "knowledge/skills.md",
+          "heading": "Hero terminal lines",
+          "text": "Short terminal-style lines used by the hero's typing effect. Phrasing is\ncondensed for a `> command` UI, but each line is grounded in a real\nproject/experience/skill entry rather than invented:\n\n- `orchestrating multi-agent AI systems` → `projects/supplysightai-agentic-supply-chain-intelligence.md`\n- `engineering ETL pipelines across enterprise platforms` → `experience.md § Graduate Software Engineer Trainee`\n- `tuning Azure AI Search indexers for retrieval` → Applied AI & Enterprise Integration, above\n- `shipping LLM-powered production workflows` → `experience.md § Graduate Software Engineer Trainee`",
+          "score": 0.1894
+        },
+        {
+          "sourceFile": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+          "heading": "Problem",
+          "text": "Supply chain teams sit on more operational data than they can read. The signal\nthat matters — a supplier slipping, a lane degrading, a stock position about to\ngo negative — is buried in tables that only get looked at after something has\nalready broken. The usual answer is a dashboard, but a dashboard only shows you\nwhat you already thought to ask for. It doesn't tell you *why* a number moved,\nwhat's likely to happen next, or which of the fifteen things now on fire you\nshould handle first.\n\nSupplySightAI was built to close that gap: instead of a human driving the\nanalysis, agents drive it and hand the human a ranked set of actions.",
+          "score": 0.1501
+        },
+        {
+          "sourceFile": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+          "heading": "Architecture",
+          "text": "The system is organized as a **multi-agent pipeline**, where each agent owns one\nstage of the reasoning chain rather than one monolithic model trying to do\neverything:\n\n- **Analysis agent** — ingests supply chain data and computes the descriptive\n  layer using Pandas: current state, deltas, and anomalies against baseline.\n- **Risk detection agent** — flags where the data crosses into risk territory,\n  turning raw anomalies into named risks.\n- **Root cause agent** — explains *why* a flagged risk appeared, tracing it back\n  through the contributing dimensions rather than just reporting the symptom.\n- **Forecasting agent** — projects disruption forward using scikit-learn models,\n  so the output is anticipatory rather than purely retrospective.\n- **Recommendation agent** — ranks the resulting findings into a prioritized\n  action list, which is what the user actually sees first.\n\n**Streamlit** is the delivery layer: it hosts the interactive front end where a\nuser inspects the agents' findings and drills from the recommendation back down\nto the evidence.",
+          "score": 0.1479
+        }
+      ],
+      "tools": [],
+      "toolResults": [],
+      "latencyMs": 243158,
+      "usage": {
+        "input": 0,
+        "output": 0
+      },
+      "intent": "skills_query",
+      "confidence": 0.95,
+      "error": "429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01m1vmpa2sedavc3mtzk0re8wf` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199553, Requested 2096. Please try again in 11m52.368s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}}",
+      "id": "experience-03",
+      "question": "Does he have any experience with LLMs in production?",
+      "mode": "answer",
+      "expectedSource": "knowledge/experience.md",
+      "retrievalHit": false,
+      "sectionHit": null,
+      "behaviourPass": null,
+      "behaviourNote": "run error: 429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in or",
+      "grounded": null,
+      "judgeVerdict": "SKIP",
+      "judgeReason": "no answer produced"
+    },
+    {
+      "answer": "",
+      "chunks": [],
+      "tools": [],
+      "toolResults": [],
+      "latencyMs": 242971,
+      "usage": {
+        "input": 0,
+        "output": 0
+      },
+      "intent": "out_of_scope",
+      "confidence": 0.3,
+      "error": "429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01m1vmpa2sedavc3mtzk0re8wf` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199150, Requested 1641. Please try again in 5m41.712s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}}",
+      "id": "education-01",
+      "question": "Where did he go to school?",
+      "mode": "answer",
+      "expectedSource": "knowledge/education.md",
+      "retrievalHit": false,
+      "sectionHit": null,
+      "behaviourPass": null,
+      "behaviourNote": "run error: 429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in or",
+      "grounded": null,
+      "judgeVerdict": "SKIP",
+      "judgeReason": "no answer produced"
+    },
+    {
+      "answer": "",
+      "chunks": [],
+      "tools": [],
+      "toolResults": [],
+      "latencyMs": 243265,
+      "usage": {
+        "input": 0,
+        "output": 0
+      },
+      "intent": "out_of_scope",
+      "confidence": 0.3,
+      "entitySlug": "commodity-intelligence-platform",
+      "error": "429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01m1vmpa2sedavc3mtzk0re8wf` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199264, Requested 1780. Please try again in 7m31.008s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}}",
+      "id": "skills-01",
+      "question": "Has he used Microsoft Fabric?",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/commodity-intelligence-platform.md",
+      "retrievalHit": false,
+      "sectionHit": null,
+      "behaviourPass": null,
+      "behaviourNote": "run error: 429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in or",
+      "grounded": null,
+      "judgeVerdict": "SKIP",
+      "judgeReason": "no answer produced"
+    },
+    {
+      "answer": "",
+      "chunks": [],
+      "tools": [],
+      "toolResults": [],
+      "latencyMs": 242777,
+      "usage": {
+        "input": 0,
+        "output": 0
+      },
+      "intent": "out_of_scope",
+      "confidence": 0.3,
+      "error": "429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01m1vmpa2sedavc3mtzk0re8wf` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199631, Requested 1710. Please try again in 9m39.312s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}}",
+      "id": "skills-02",
+      "question": "How good is he at Python?",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+      "retrievalHit": false,
+      "sectionHit": null,
+      "behaviourPass": null,
+      "behaviourNote": "run error: 429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in or",
+      "grounded": null,
+      "judgeVerdict": "SKIP",
+      "judgeReason": "no answer produced"
+    },
+    {
+      "answer": "",
+      "chunks": [],
+      "tools": [],
+      "toolResults": [],
+      "latencyMs": 242974,
+      "usage": {
+        "input": 0,
+        "output": 0
+      },
+      "intent": "out_of_scope",
+      "confidence": 0.3,
+      "error": "429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01m1vmpa2sedavc3mtzk0re8wf` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199235, Requested 1757. Please try again in 7m8.544s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}}",
+      "id": "system-01",
+      "question": "Why did you build this site on LangGraph instead of a single LangChain chain?",
+      "mode": "answer",
+      "expectedSource": "knowledge/system-architecture.md",
+      "expectedSection": "ADR-001",
+      "retrievalHit": false,
+      "sectionHit": false,
+      "behaviourPass": null,
+      "behaviourNote": "run error: 429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in or",
+      "grounded": null,
+      "judgeVerdict": "SKIP",
+      "judgeReason": "no answer produced"
+    },
+    {
+      "answer": "",
+      "chunks": [
+        {
+          "sourceFile": "knowledge/system-architecture.md",
+          "heading": "ADR-002: A two-model cascade instead of one model everywhere",
+          "text": "Both providers are reached through LangChain's model wrappers, so the graph\nonly ever sees `.invoke()` / `.stream()` / `.bindTools()`. Swapping either\nprovider is an edit to `lib/agent/models.ts` and nothing else. If Groq is\nunavailable, classification fails closed to low confidence, which routes to\nclarify — the agent asks a question rather than answering wrongly.",
+          "score": 0.4119
+        },
+        {
+          "sourceFile": "knowledge/system-architecture.md",
+          "heading": "ADR-002: A two-model cascade instead of one model everywhere",
+          "text": "### Context\n\nEvery turn needs a routing decision and an answer. The simplest configuration\nis one capable model doing both.\n\n### Decision\n\nRoute on Groq's `llama-3.1-8b-instant` at temperature 0; generate on Google's\n`gemini-2.0-flash` at temperature 0.3.\n\n### Trade-offs considered\n\nOne model is simpler: one key, one SDK, one failure mode, one bill. The case\nagainst it is that classification and generation want opposite things.\n\nRouting wants determinism and speed. It emits a label and maybe a slug, it runs\nbefore anything else, and its latency is added to every single turn. Asking a\nlarge multimodal model to do that is paying for capability the task never uses\nand adding delay the user always feels. Groq's inference speed is the point of\nusing it — the router should be effectively free.\n\nGeneration wants the opposite: a long context window to hold retrieved chunks\nand tool output, reliable tool calling, and enough fluency to write prose worth\nreading. Gemini Flash provides that with a free tier generous enough to develop\nagainst.\n\nThe real cost of the split is two provider dependencies, two ways to fail, and\ntwo rate limits. It also introduces a class of bug that does not exist with one\nmodel — the router returning an intent or slug the rest of the graph does not\nrecognize — which is why the router's output is validated against the real\nintent list and fuzzy-matched against the real project slugs rather than\ntrusted.\n\n### Consequences",
+          "score": 0.3336
+        },
+        {
+          "sourceFile": "knowledge/projects/commodity-intelligence-platform.md",
+          "heading": "Key decisions",
+          "text": "**Direct Lake instead of Import mode.** This is the decision that makes the\n\"near-real-time\" claim true rather than aspirational. Import mode would put a\nscheduled refresh between the gold layer and the dashboard; Direct Lake has\nPower BI read the gold tables in place, so there is no refresh window to fall\nbehind in.\n\n**Append-only bronze.** Landing data exactly as received — untransformed — costs\nstorage but buys lineage and full reprocessing. If a transformation rule turns\nout to be wrong, silver and gold can be rebuilt from bronze without going back\nto the source feeds.\n\n**Cleaning in silver, aggregation in gold.** Keeping deduplication and schema\nconformance separate from business aggregation means each layer has one job, and\na bad number can be traced to the layer that produced it.\n\n**Gold optimized for query, not for completeness.** The gold layer is shaped for\nwhat the dashboards ask, which is what allows Direct Lake to stay fast.",
+          "score": 0.2708
+        },
+        {
+          "sourceFile": "knowledge/system-architecture.md",
+          "heading": "Model choices",
+          "text": "| Node | Model | Why |\n|---|---|---|\n| classify | Groq `llama-3.1-8b-instant` | Latency. Runs every turn, emits a label. |\n| act, generate | Google `gemini-2.0-flash` | Tool calling, long context, generous free tier. |\n| embeddings | `Xenova/all-MiniLM-L6-v2`, local | No API key, no per-query cost, 384 dimensions. |",
+          "score": 0.2638
+        },
+        {
+          "sourceFile": "knowledge/projects/sap-bw-data-integration.md",
+          "heading": "Key decisions",
+          "text": "**One pipeline, many sources.** The defining decision: SAP BW is onboarded as a\nsource feed into the existing bronze layer rather than getting its own parallel\npipeline. Transformation logic, curation rules, and the reporting layer are\nshared, so a business definition lives in exactly one place.\n\n**Conform to the shared schema in silver.** SAP BW's native structures are\nabsorbed and aligned at the silver stage, which is what lets everything\ndownstream stay source-agnostic.\n\n**Bronze stays raw for SAP BW too.** The same append-only, unmodified landing\nrule applies, preserving the original extracts for lineage and reprocessing.",
+          "score": 0.2573
+        },
+        {
+          "sourceFile": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+          "heading": "Challenges",
+          "text": "**Root cause is harder than detection.** Detecting that a metric moved is\nmechanical; attributing it correctly is not. The explanation layer has to\ndistinguish a genuine driver from a correlated bystander, and a confidently\nwrong root cause is worse than no root cause at all.\n\n**Keeping agents grounded in the data.** Every claim an agent makes has to trace\nback to a row it actually read. Without that constraint, an explanation layer\ndrifts into plausible-sounding narrative.\n\n**Ranking across incomparable risks.** Prioritization requires putting a\nforecast-driven risk and a currently-live anomaly on the same scale, which is a\njudgment call encoded in the system rather than something the data hands you.",
+          "score": 0.2552
+        }
+      ],
+      "tools": [],
+      "toolResults": [],
+      "latencyMs": 244011,
+      "usage": {
+        "input": 0,
+        "output": 0
+      },
+      "intent": "architecture_meta",
+      "confidence": 0.95,
+      "error": "429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01m1vmpa2sedavc3mtzk0re8wf` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199587, Requested 2880. Please try again in 17m45.744s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}}",
+      "id": "system-02",
+      "question": "Why use two different model providers?",
+      "mode": "answer",
+      "expectedSource": "knowledge/system-architecture.md",
+      "expectedSection": "ADR-002",
+      "retrievalHit": true,
+      "sectionHit": true,
+      "behaviourPass": null,
+      "behaviourNote": "run error: 429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in or",
+      "grounded": null,
+      "judgeVerdict": "SKIP",
+      "judgeReason": "no answer produced"
+    },
+    {
+      "answer": "",
+      "chunks": [],
+      "tools": [],
+      "toolResults": [],
+      "latencyMs": 243504,
+      "usage": {
+        "input": 0,
+        "output": 0
+      },
+      "intent": "out_of_scope",
+      "confidence": 0.3,
+      "error": "429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01m1vmpa2sedavc3mtzk0re8wf` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199722, Requested 1747. Please try again in 10m34.608s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}}",
+      "id": "system-03",
+      "question": "Why not use a vector database for retrieval?",
+      "mode": "answer",
+      "expectedSource": "knowledge/system-architecture.md",
+      "expectedSection": "ADR-003",
+      "retrievalHit": false,
+      "sectionHit": false,
+      "behaviourPass": null,
+      "behaviourNote": "run error: 429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in or",
+      "grounded": null,
+      "judgeVerdict": "SKIP",
+      "judgeReason": "no answer produced"
+    },
+    {
+      "answer": "",
+      "chunks": [],
+      "tools": [],
+      "toolResults": [],
+      "latencyMs": 242851,
+      "usage": {
+        "input": 0,
+        "output": 0
+      },
+      "intent": "out_of_scope",
+      "confidence": 0.3,
+      "error": "429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01m1vmpa2sedavc3mtzk0re8wf` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199564, Requested 1723. Please try again in 9m15.983999999s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}}",
+      "id": "notdoc-01",
+      "question": "What awards or recognitions has he received?",
+      "mode": "not_documented",
+      "expectedSource": null,
+      "retrievalHit": null,
+      "sectionHit": null,
+      "behaviourPass": null,
+      "behaviourNote": "run error: 429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in or",
+      "grounded": null,
+      "judgeVerdict": "SKIP",
+      "judgeReason": "no answer produced"
+    },
+    {
+      "answer": "",
+      "chunks": [
+        {
+          "sourceFile": "knowledge/experience.md",
+          "heading": "Graduate Software Engineer Trainee",
+          "text": "**Employer:** Emerson\n**Dates:** \n**Location:** \n**Links:** —\n\n- Engineered ETL data migration pipelines across enterprise platforms using C#\n  and .NET, reducing manual errors by 60% and improving interoperability\n- Developed protocol-aware MODBUS and HART data conversion workflows,\n  maintaining 90%+ data integrity\n- Built an LLM-powered internal analytics assistant using Python and prompt\n  engineering, reducing enterprise knowledge retrieval time by 45%\n- Automated end-to-end data ingestion, model execution, and deployment using\n  REST APIs and Azure DevOps CI/CD pipelines\n- Implemented 15+ data validation rules through system log analysis to improve\n  data quality in production ML pipelines\n- Collaborated with cross-functional stakeholders to define KPIs and execute\n  150+ feature-level test scenarios aligned with business requirements\n\n**Stack:** C#, .NET, Python, REST APIs, Azure DevOps, MODBUS, HART, LLMs, prompt\nengineering",
+          "score": 0.2403
+        },
+        {
+          "sourceFile": "knowledge/profile.md",
+          "heading": "Roles I'm targeting",
+          "text": "- **AI Architect** — designing the end-to-end shape of enterprise AI systems:\n  retrieval layers, agent orchestration, data pipelines, and the evaluation\n  harnesses that keep them honest.\n- **Forward Deployed Engineer** — sitting with the customer, mapping a messy\n  real-world problem onto a working system, and shipping it inside their\n  constraints rather than a clean-room demo.\n\nAdjacent titles that describe the same work: AI Engineer, Data Scientist, AI\nProduct Manager.",
+          "score": 0.1439
+        },
+        {
+          "sourceFile": "knowledge/skills.md",
+          "heading": "Applied AI & Enterprise Integration",
+          "text": "- Azure AI Search indexers (building and tuning search indexes for retrieval)\n- Copilot Studio integrations (building conversational agents on top of\n  enterprise data)\n- LLM failure benchmarking (systematic evaluation of where and why LLM outputs\n  fail)\n\n---",
+          "score": 0.1278
+        }
+      ],
+      "tools": [],
+      "toolResults": [],
+      "latencyMs": 243034,
+      "usage": {
+        "input": 0,
+        "output": 0
+      },
+      "intent": "experience",
+      "confidence": 0.95,
+      "error": "429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01m1vmpa2sedavc3mtzk0re8wf` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199655, Requested 2042. Please try again in 12m13.103999999s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}}",
+      "id": "notdoc-02",
+      "question": "What years did he work at Emerson?",
+      "mode": "not_documented",
+      "expectedSource": "knowledge/experience.md",
+      "retrievalHit": true,
+      "sectionHit": null,
+      "behaviourPass": null,
+      "behaviourNote": "run error: 429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in or",
+      "grounded": null,
+      "judgeVerdict": "SKIP",
+      "judgeReason": "no answer produced"
+    },
+    {
+      "answer": "",
+      "chunks": [],
+      "tools": [],
+      "toolResults": [],
+      "latencyMs": 243149,
+      "usage": {
+        "input": 0,
+        "output": 0
+      },
+      "intent": "out_of_scope",
+      "confidence": 0.3,
+      "entitySlug": "parcelpal-route-optimization",
+      "error": "429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01m1vmpa2sedavc3mtzk0re8wf` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199545, Requested 1738. Please try again in 9m14.256s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}}",
+      "id": "notdoc-03",
+      "question": "Can you link me to the GitHub repo for ParcelPal?",
+      "mode": "not_documented",
+      "expectedSource": "knowledge/projects/parcelpal-route-optimization.md",
+      "retrievalHit": false,
+      "sectionHit": null,
+      "behaviourPass": null,
+      "behaviourNote": "run error: 429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in or",
+      "grounded": null,
+      "judgeVerdict": "SKIP",
+      "judgeReason": "no answer produced"
+    },
+    {
+      "answer": "",
+      "chunks": [],
+      "tools": [],
+      "toolResults": [],
+      "latencyMs": 242611,
+      "usage": {
+        "input": 0,
+        "output": 0
+      },
+      "intent": "out_of_scope",
+      "confidence": 0.3,
+      "error": "429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01m1vmpa2sedavc3mtzk0re8wf` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199146, Requested 1727. Please try again in 6m17.136s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}}",
+      "id": "clarify-01",
+      "question": "Tell me about the pipeline project",
+      "mode": "clarify",
+      "expectedSource": null,
+      "retrievalHit": null,
+      "sectionHit": null,
+      "behaviourPass": null,
+      "behaviourNote": "run error: 429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in or",
+      "grounded": null,
+      "judgeVerdict": "N/A",
+      "judgeReason": "clarify item — no answer to judge"
+    },
+    {
+      "answer": "",
+      "chunks": [],
+      "tools": [],
+      "toolResults": [],
+      "latencyMs": 242580,
+      "usage": {
+        "input": 0,
+        "output": 0
+      },
+      "intent": "out_of_scope",
+      "confidence": 0.3,
+      "error": "429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01m1vmpa2sedavc3mtzk0re8wf` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199251, Requested 1359. Please try again in 4m23.52s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}}",
+      "id": "decline-01",
+      "question": "Write me a Python script to scrape a website.",
+      "mode": "decline",
+      "expectedSource": null,
+      "retrievalHit": null,
+      "sectionHit": null,
+      "behaviourPass": null,
+      "behaviourNote": "run error: 429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in or",
+      "grounded": null,
+      "judgeVerdict": "SKIP",
+      "judgeReason": "no answer produced"
+    },
+    {
+      "answer": "",
+      "chunks": [],
+      "tools": [],
+      "toolResults": [],
+      "latencyMs": 242707,
+      "usage": {
+        "input": 0,
+        "output": 0
+      },
+      "intent": "out_of_scope",
+      "confidence": 0.3,
+      "error": "429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01m1vmpa2sedavc3mtzk0re8wf` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199361, Requested 1877. Please try again in 8m54.816s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing\",\"type\":\"tokens\",\"code\":\"rate_limit_exceeded\"}}",
+      "id": "decline-02",
+      "question": "What are his salary expectations and is he open to relocating?",
+      "mode": "decline",
+      "expectedSource": null,
+      "retrievalHit": null,
+      "sectionHit": null,
+      "behaviourPass": null,
+      "behaviourNote": "run error: 429 {\"error\":{\"message\":\"Rate limit reached for model `openai/gpt-oss-20b` in or",
+      "grounded": null,
+      "judgeVerdict": "SKIP",
+      "judgeReason": "no answer produced"
+    }
+  ]
+}

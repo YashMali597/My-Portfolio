@@ -1,0 +1,237 @@
+/* =========================
+   HERO SHELL
+========================= */
+.hero-section {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+  padding: 72px 40px 40px 40px;
+  background: radial-gradient(circle at 30% 20%, rgba(34, 211, 238, 0.06), transparent 60%),
+    var(--bg-950);
+}
+
+.hero-network {
+  flex: 1 1 55%;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.hero-network .agent-network {
+  width: 100%;
+  height: auto;
+  max-width: 640px;
+}
+
+.hero-content-wrapper {
+  flex: 1 1 40%;
+  min-width: 0;
+}
+
+.hero-content {
+  max-width: 560px;
+  padding: 2.5rem;
+}
+
+.hero-status {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1.25rem;
+}
+
+.hero-status-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: var(--accent-cyan);
+}
+
+.hero-name {
+  font-family: var(--font-sans);
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+}
+
+.hero-role {
+  font-family: var(--font-mono);
+  font-size: 1.3rem;
+  font-weight: 500;
+  color: var(--accent-cyan);
+  margin: 0 0 1rem 0;
+  min-height: 1.6em;
+}
+
+.hero-tagline {
+  font-family: var(--font-sans);
+  font-size: 1.05rem;
+  color: var(--text-muted);
+  margin: 0 0 1.75rem 0;
+  line-height: 1.6;
+}
+
+.hero-terminal {
+  font-family: var(--font-mono);
+  font-size: 0.92rem;
+  padding: 0.9rem 1.1rem;
+  background: rgba(5, 5, 10, 0.6);
+  border: 1px solid var(--border-hairline);
+  border-radius: 8px;
+  color: var(--text-primary);
+  min-height: 2.6em;
+  display: flex;
+  align-items: center;
+}
+
+.hero-terminal-prompt {
+  color: var(--accent-purple);
+  margin-right: 0.3rem;
+}
+
+/* =========================
+   AGENT NETWORK DIAGRAM
+========================= */
+.agent-edge {
+  fill: none;
+  stroke: var(--border-hairline-glow);
+  stroke-width: 1.5;
+}
+
+.agent-edge-pulse {
+  fill: none;
+  stroke: var(--accent-cyan);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 24 300;
+  filter: drop-shadow(0 0 4px rgba(34, 211, 238, 0.9));
+  animation: agent-pulse-travel 3.2s linear infinite;
+}
+
+@keyframes agent-pulse-travel {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: -324;
+  }
+}
+
+.agent-node {
+  fill: var(--bg-panel);
+  stroke: var(--accent-cyan);
+  stroke-width: 2;
+}
+
+.agent-node--center {
+  stroke: var(--accent-purple);
+  stroke-width: 2.5;
+}
+
+.agent-node-glow {
+  fill: var(--accent-purple);
+  opacity: 0.25;
+  filter: blur(6px);
+  transform-origin: center;
+  animation: agent-glow-pulse 2.6s ease-in-out infinite;
+}
+
+.agent-node-glow--static {
+  animation: none;
+  opacity: 0.3;
+}
+
+@keyframes agent-glow-pulse {
+  0%,
+  100% {
+    opacity: 0.18;
+    transform: scale(0.92);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(1.08);
+  }
+}
+
+.agent-node-label {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  fill: var(--text-muted);
+  letter-spacing: 0.03em;
+}
+
+.agent-node-label--center {
+  fill: var(--text-primary);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+@media (max-width: 992px) {
+  .hero-section {
+    flex-direction: column;
+    justify-content: center;
+    padding: 100px 24px 40px 24px;
+    min-height: auto;
+    gap: 24px;
+  }
+  .hero-content-wrapper,
+  .hero-network {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+  .hero-content {
+    max-width: 100%;
+  }
+  .hero-network .agent-network {
+    max-width: 420px;
+  }
+  .hero-name {
+    font-size: 2.4rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero-content {
+    padding: 1.75rem;
+  }
+  .hero-name {
+    font-size: 2rem;
+  }
+  .hero-role {
+    font-size: 1.05rem;
+  }
+  .hero-network .agent-network {
+    max-width: 320px;
+  }
+}
+
+/* Static, non-animated diagram on small screens */
+@media (max-width: 640px) {
+  .agent-edge-pulse {
+    animation: none;
+    opacity: 0;
+  }
+  .agent-node-glow {
+    animation: none;
+    opacity: 0.3;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .agent-edge-pulse {
+    animation: none !important;
+    opacity: 0;
+  }
+  .agent-node-glow {
+    animation: none !important;
+  }
+}

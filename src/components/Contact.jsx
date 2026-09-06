@@ -1,20 +1,25 @@
+import { Mail, Phone, Linkedin, Github } from "lucide-react";
+import { profile } from "../data/site-content";
+
 export default function Contact() {
+  const { email, phone, linkedin, github } = profile.contact;
+
   return (
-    <section className="section bg-dark text-light">
+    <section id="contact" className="section bg-dark text-light">
       <div className="container text-center">
         <h2 className="section-title">Contact Me</h2>
         <div className="contact-icons">
-          <a href="mailto:yashmali597@gmail.com">
-            <i className="fas fa-envelope"></i>
+          <a href={`mailto:${email}`} aria-label="Email">
+            <Mail size={32} aria-hidden="true" />
           </a>
-          <a href="tel:+12144754785">
-            <i className="fas fa-phone"></i>
+          <a href={`tel:${phone}`} aria-label="Phone">
+            <Phone size={32} aria-hidden="true" />
           </a>
-          <a href="https://www.linkedin.com/in/yash-v-mali/" target="_blank" rel="noreferrer">
-            <i className="fab fa-linkedin"></i>
+          <a href={linkedin} target="_blank" rel="noreferrer" aria-label="LinkedIn">
+            <Linkedin size={32} aria-hidden="true" />
           </a>
-          <a href="https://github.com/YashMali597" target="_blank" rel="noreferrer">
-            <i className="fab fa-github"></i>
+          <a href={github} target="_blank" rel="noreferrer" aria-label="GitHub">
+            <Github size={32} aria-hidden="true" />
           </a>
         </div>
       </div>

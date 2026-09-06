@@ -1,0 +1,219 @@
+/* =========================
+   Evaluation panel — /system
+   Arc gauges echo the old telemetry style, but these are MEASURED numbers
+   from eval/results.json, not self-assessed ratings.
+========================= */
+
+.eval-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.eval-gauges {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+.eval-gauge {
+  position: relative;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+  border-radius: 10px;
+  padding: 1rem 0.75rem 0.85rem;
+}
+.eval-gauge__svg {
+  width: 108px;
+  height: 108px;
+  display: block;
+}
+.eval-gauge__track,
+.eval-gauge__fill {
+  fill: none;
+  stroke-width: 7;
+  stroke-linecap: round;
+}
+.eval-gauge__track {
+  stroke: rgba(255, 255, 255, 0.07);
+}
+.eval-gauge__fill {
+  transition: stroke-dasharray 1s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.eval-gauge--good .eval-gauge__fill {
+  stroke: var(--success);
+}
+.eval-gauge--warn .eval-gauge__fill {
+  stroke: var(--accent-amber);
+}
+.eval-gauge--bad .eval-gauge__fill {
+  stroke: var(--danger);
+}
+
+.eval-gauge__center {
+  position: absolute;
+  top: 1rem;
+  height: 108px;
+  width: 108px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.eval-gauge__value {
+  font-family: var(--font-mono);
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1;
+}
+.eval-gauge__detail {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--text-dim);
+  margin-top: 0.2rem;
+}
+.eval-gauge__label {
+  margin-top: 0.5rem;
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.35;
+}
+
+.eval-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1rem;
+  margin: 0;
+  padding: 1rem 1.15rem;
+  background: var(--bg-900);
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.07));
+  border-radius: 10px;
+}
+.eval-stats dt {
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 0.25rem;
+}
+.eval-stats dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.86rem;
+  color: var(--text-primary);
+}
+
+.eval-modes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+.eval-mode {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.1));
+  border-radius: 7px;
+  padding: 0.4rem 0.7rem;
+}
+.eval-mode__name {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+.eval-mode__score {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  color: var(--text-primary);
+}
+.eval-mode--good {
+  border-color: rgba(52, 211, 153, 0.4);
+}
+.eval-mode--good .eval-mode__score {
+  color: var(--success);
+}
+.eval-mode--warn {
+  border-color: rgba(245, 158, 11, 0.4);
+}
+.eval-mode--warn .eval-mode__score {
+  color: var(--accent-amber);
+}
+.eval-mode--bad {
+  border-color: rgba(248, 113, 113, 0.4);
+}
+.eval-mode--bad .eval-mode__score {
+  color: var(--danger);
+}
+
+.eval-failures {
+  border: 1px solid rgba(248, 113, 113, 0.28);
+  border-radius: 10px;
+  padding: 1rem 1.15rem;
+  background: rgba(248, 113, 113, 0.04);
+}
+.eval-failures__title {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--danger);
+}
+.eval-failures ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+.eval-failures li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-size: 0.8rem;
+}
+.eval-failures code {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--accent-amber);
+}
+.eval-failure__q {
+  color: var(--text-muted);
+}
+.eval-failure__why {
+  color: var(--text-dim);
+  font-size: 0.76rem;
+}
+
+.eval-clean {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--success);
+}
+
+.eval-meta {
+  margin: 0;
+  font-size: 0.76rem;
+  line-height: 1.6;
+  color: var(--text-dim);
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.06));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eval-gauge__fill {
+    transition: none;
+  }
+}

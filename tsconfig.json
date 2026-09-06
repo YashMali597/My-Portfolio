@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "checkJs": false,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": false,
+    // Vite and tsx must agree on the JSX runtime. Without this, tsx falls back
+    // to the classic runtime and every component fails with "React is not
+    // defined", since no file imports React explicitly.
+    "jsx": "react-jsx",
+    "types": ["node"]
+  },
+  "include": ["src", "lib", "api", "scripts"],
+  "exclude": ["node_modules", "dist"]
+}

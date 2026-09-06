@@ -1,0 +1,138 @@
+/* =========================
+   CLI NAVBAR
+========================= */
+.cli-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: rgba(10, 10, 15, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border-hairline);
+  font-family: var(--font-mono);
+}
+
+.cli-navbar__inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0.85rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.cli-navbar__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.cli-navbar__prompt {
+  color: var(--accent-cyan);
+}
+
+.cli-navbar__links {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex: 1;
+  /* Without this, a flex item's default min-width:auto lets it grow to fit
+     all its content instead of respecting overflow-x — the nav links were
+     pushing the whole page wider instead of scrolling internally. */
+  min-width: 0;
+  justify-content: center;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.cli-navbar__links::-webkit-scrollbar {
+  display: none;
+}
+
+.cli-navbar__link {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  white-space: nowrap;
+  transition: color 0.2s ease;
+}
+
+.cli-navbar__link:hover {
+  color: var(--accent-cyan);
+}
+
+.cli-navbar__link:focus-visible,
+.cli-navbar__brand:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.cli-navbar__link--resume {
+  border: 1px solid var(--accent-cyan);
+  color: var(--accent-cyan);
+  padding: 3px 10px;
+  border-radius: 4px;
+}
+
+.cli-navbar__link--resume:hover {
+  background: rgba(34, 211, 238, 0.12);
+}
+
+.cli-navbar__status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.cli-navbar__status-label {
+  font-size: 0.68rem;
+  letter-spacing: 0.05em;
+  color: var(--success);
+}
+
+@media (max-width: 768px) {
+  .cli-navbar__status-label {
+    display: none;
+  }
+  .cli-navbar__links {
+    justify-content: flex-start;
+  }
+}
+
+/* Anchor targets should not hide under the fixed navbar */
+section[id] {
+  scroll-margin-top: 72px;
+}
+
+/* =========================
+   CLI FOOTER
+========================= */
+.cli-footer {
+  font-family: var(--font-mono);
+  background: var(--bg-950);
+  border-top: 1px solid var(--border-hairline);
+  padding: 1.5rem 0;
+  text-align: center;
+}
+
+.cli-footer__inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cli-footer__prompt {
+  color: var(--accent-cyan);
+}
+
+.cli-footer__text {
+  color: var(--text-dim);
+  font-size: 0.8rem;
+}

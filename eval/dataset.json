@@ -1,0 +1,237 @@
+{
+  "version": 1,
+  "description": "Evaluation set for the portfolio agent. Every expected answer is grounded in a specific file and section under /knowledge — this measures retrieval and grounding, not the model's world knowledge. Do not add a question whose answer is not documented, unless the expected mode is not_documented.",
+  "modes": {
+    "answer": "Should retrieve the expected source and answer from it.",
+    "not_documented": "Subject is in scope but the fact is genuinely absent from /knowledge. Must say so rather than guess.",
+    "clarify": "Ambiguous. The graph should interrupt and ask, not pick one.",
+    "decline": "Out of scope. Should decline and redirect to portfolio topics."
+  },
+  "items": [
+    {
+      "id": "commodity-01",
+      "question": "How does the Commodity Intelligence Platform pipeline work?",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/commodity-intelligence-platform.md",
+      "expectedSection": "Architecture",
+      "expectedGist": "Raw commodity/market data is extracted, then flows through a Microsoft Fabric medallion architecture (bronze raw ingest, silver cleansed, gold curated), and Power BI reads the gold layer in Direct Lake mode."
+    },
+    {
+      "id": "commodity-02",
+      "question": "Why did he use Direct Lake mode instead of importing the data into Power BI?",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/commodity-intelligence-platform.md",
+      "expectedSection": "Key decisions",
+      "expectedGist": "Import mode would put a scheduled refresh between the gold layer and the dashboard; Direct Lake reads the gold tables in place so there is no refresh window to fall behind in. This is what makes the near-real-time claim true."
+    },
+    {
+      "id": "commodity-03",
+      "question": "What is the bronze layer for in the commodity platform?",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/commodity-intelligence-platform.md",
+      "expectedSection": "Architecture",
+      "expectedGist": "Bronze is a raw, append-only landing zone holding data exactly as received, preserving original records for lineage and reprocessing."
+    },
+    {
+      "id": "sap-01",
+      "question": "Has he worked with SAP?",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/sap-bw-data-integration.md",
+      "expectedGist": "Yes — the SAP BW data integration project brings SAP BW in as a source system feeding the same Fabric medallion pipeline used elsewhere, rather than a separate parallel stack."
+    },
+    {
+      "id": "sap-02",
+      "question": "Why was SAP BW added to the existing pipeline instead of building a separate one?",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/sap-bw-data-integration.md",
+      "expectedSection": "Key decisions",
+      "expectedGist": "One pipeline, many sources: sharing the bronze layer and transformation logic means a business definition lives in exactly one place, avoiding two sets of rules that could drift."
+    },
+    {
+      "id": "supplysight-01",
+      "question": "Tell me about SupplySightAI",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+      "expectedGist": "An agentic AI platform that autonomously analyzes supply chain data, detects risks, explains root causes, forecasts disruptions, and recommends prioritized actions. Built with Python, Pandas, scikit-learn and Streamlit."
+    },
+    {
+      "id": "supplysight-02",
+      "question": "Why did SupplySightAI use multiple agents instead of one prompt?",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+      "expectedSection": "Key decisions",
+      "expectedGist": "Splitting analysis, risk, root cause, forecasting and recommendation into separate agents gives each stage a narrow checkable job and makes failures localizable to the agent that produced the faulty input."
+    },
+    {
+      "id": "supplysight-03",
+      "question": "What was hard about building the supply chain agent system?",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+      "expectedSection": "Challenges",
+      "expectedGist": "Root cause attribution is harder than detection; keeping agents grounded in rows they actually read; and ranking risks that are not directly comparable."
+    },
+    {
+      "id": "parcelpal-01",
+      "question": "What algorithm did ParcelPal use for routing?",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/parcelpal-route-optimization.md",
+      "expectedGist": "Dijkstra's algorithm, computing shortest paths over the delivery network modelled as a weighted graph."
+    },
+    {
+      "id": "parcelpal-02",
+      "question": "What stack was ParcelPal built on?",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/parcelpal-route-optimization.md",
+      "expectedGist": "JavaScript with React on the front end, Node.js and Express serving a REST API, and MongoDB for persistence."
+    },
+    {
+      "id": "churn-01",
+      "question": "What results did the churn prediction project achieve?",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/customer-segmentation-churn-prediction.md",
+      "expectedSection": "Impact",
+      "expectedGist": "Improved targeted retention by 12%, working across 100K+ customer records, by replacing untargeted outreach with segment-aware, risk-scored next-best-action recommendations."
+    },
+    {
+      "id": "churn-02",
+      "question": "How did he approach customer segmentation?",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/customer-segmentation-churn-prediction.md",
+      "expectedGist": "Segment first via clustering, then score churn risk, so the churn signal is interpreted in the context of each behavioural segment. Behavioural features were preferred over demographic ones."
+    },
+    {
+      "id": "causal-01",
+      "question": "Tell me about the causal inference work",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/ai-causal-intelligence-system.md",
+      "expectedGist": "An uplift-based targeting system using causal inference on 100K+ user A/B simulation data to find high-impact segments and allocate budget, simulating $684K+ incremental revenue."
+    },
+    {
+      "id": "causal-02",
+      "question": "Why model uplift instead of just predicting who will convert?",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/ai-causal-intelligence-system.md",
+      "expectedSection": "Key decisions",
+      "expectedGist": "A propensity model finds people likely to convert, many of whom would convert anyway, so budget spent on them buys nothing. Uplift models the incremental effect of treatment, which is what determines ROI."
+    },
+    {
+      "id": "causal-03",
+      "question": "Is the $684K figure real revenue?",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/ai-causal-intelligence-system.md",
+      "expectedSection": "Impact",
+      "expectedGist": "No — it is a simulated outcome from the A/B simulation dataset, not a realized business result, and should always be described that way."
+    },
+    {
+      "id": "experience-01",
+      "question": "What did he do at Emerson?",
+      "mode": "answer",
+      "expectedSource": "knowledge/experience.md",
+      "expectedSection": "Graduate Software Engineer Trainee",
+      "expectedGist": "Engineered ETL data migration pipelines in C# and .NET reducing manual errors by 60%, built protocol-aware MODBUS and HART conversion workflows at 90%+ data integrity, and built an LLM-powered internal analytics assistant that cut knowledge retrieval time by 45%."
+    },
+    {
+      "id": "experience-02",
+      "question": "What did he build during the Wizphys AI internship?",
+      "mode": "answer",
+      "expectedSource": "knowledge/experience.md",
+      "expectedSection": "Deep Learning Intern",
+      "expectedGist": "Real-time exercise detection for a physiotherapy mobile app using PoseNet keypoint extraction and PyTorch classification, improving prediction accuracy by 15% and session engagement by 18%."
+    },
+    {
+      "id": "experience-03",
+      "question": "Does he have any experience with LLMs in production?",
+      "mode": "answer",
+      "expectedSource": "knowledge/experience.md",
+      "expectedGist": "At Emerson he built an LLM-powered internal analytics assistant using Python and prompt engineering, reducing enterprise knowledge retrieval time by 45%."
+    },
+    {
+      "id": "education-01",
+      "question": "Where did he go to school?",
+      "mode": "answer",
+      "expectedSource": "knowledge/education.md",
+      "expectedGist": "MS in Management of Information Systems at the University of Texas at Dallas (2025-2027, GPA 3.75/4.0) and a Bachelor of Technology at VIT Pune, India (2020-2024, CGPA 8.77/10.0)."
+    },
+    {
+      "id": "skills-01",
+      "question": "Has he used Microsoft Fabric?",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/commodity-intelligence-platform.md",
+      "expectedGist": "Yes — Microsoft Fabric is the platform behind both the Commodity Intelligence Platform and the SAP BW data integration, implementing a bronze/silver/gold medallion architecture."
+    },
+    {
+      "id": "skills-02",
+      "question": "How good is he at Python?",
+      "mode": "answer",
+      "expectedSource": "knowledge/projects/supplysightai-agentic-supply-chain-intelligence.md",
+      "expectedGist": "Answered by evidence rather than a rating: Python appears across SupplySightAI, the churn prediction system, and the causal intelligence system. There are no proficiency scores in this knowledge base."
+    },
+    {
+      "id": "system-01",
+      "question": "Why did you build this site on LangGraph instead of a single LangChain chain?",
+      "mode": "answer",
+      "expectedSource": "knowledge/system-architecture.md",
+      "expectedSection": "ADR-001",
+      "expectedGist": "A single chain collapses five decisions into one opaque one, making a wrong answer impossible to attribute. LangGraph makes each node inspectable, enables intent-filtered retrieval, and is what makes interrupt() expressible at all."
+    },
+    {
+      "id": "system-02",
+      "question": "Why use two different model providers?",
+      "mode": "answer",
+      "expectedSource": "knowledge/system-architecture.md",
+      "expectedSection": "ADR-002",
+      "expectedGist": "Routing wants determinism and low latency on every turn, so it runs on Groq's Llama 8B at temperature 0. Generation wants long context, tool calling and fluency, so it runs on Gemini Flash."
+    },
+    {
+      "id": "system-03",
+      "question": "Why not use a vector database for retrieval?",
+      "mode": "answer",
+      "expectedSource": "knowledge/system-architecture.md",
+      "expectedSection": "ADR-003",
+      "expectedGist": "At this scale a flat JSON index of a few dozen chunks scans in under a millisecond, faster than the network round trip to any vector database, with no service to run or keep in sync."
+    },
+    {
+      "id": "notdoc-01",
+      "question": "What awards or recognitions has he received?",
+      "mode": "not_documented",
+      "expectedSource": null,
+      "expectedGist": "Nothing is documented. achievements.md contains only unfilled placeholder sections, which are excluded from the index. The agent should say this is not documented rather than substituting project outcomes.",
+      "note": "expectedSource is deliberately null: achievements.md contributes ZERO chunks to the index (all its sections are placeholders and are filtered at build time), so no retrieval could ever hit it. Scoring a retrieval expectation here would be measuring an impossibility, not the agent. The behaviour check — must admit the gap — is the real test."
+    },
+    {
+      "id": "notdoc-02",
+      "question": "What years did he work at Emerson?",
+      "mode": "not_documented",
+      "expectedSource": "knowledge/experience.md",
+      "expectedGist": "Dates are not documented for either role. The agent should say so rather than estimating or inferring a range."
+    },
+    {
+      "id": "notdoc-03",
+      "question": "Can you link me to the GitHub repo for ParcelPal?",
+      "mode": "not_documented",
+      "expectedSource": "knowledge/projects/parcelpal-route-optimization.md",
+      "expectedGist": "No repo, demo or writeup link is documented for any project — all link fields are empty. The agent should say so rather than inventing or guessing a URL."
+    },
+    {
+      "id": "clarify-01",
+      "question": "Tell me about the pipeline project",
+      "mode": "clarify",
+      "expectedSource": null,
+      "expectedGist": "Ambiguous: both the Commodity Intelligence Platform and the SAP BW data integration are Fabric medallion pipelines. The graph should interrupt and ask which one rather than picking."
+    },
+    {
+      "id": "decline-01",
+      "question": "Write me a Python script to scrape a website.",
+      "mode": "decline",
+      "expectedSource": null,
+      "expectedGist": "Out of scope. Should decline to write code and redirect toward Yash's documented work."
+    },
+    {
+      "id": "decline-02",
+      "question": "What are his salary expectations and is he open to relocating?",
+      "mode": "decline",
+      "expectedSource": null,
+      "expectedGist": "Compensation and availability are explicitly out of scope per profile.md. Should decline and point to the contact email rather than speculating."
+    }
+  ]
+}

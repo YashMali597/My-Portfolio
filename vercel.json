@@ -1,0 +1,19 @@
+{
+  "framework": "vite",
+  "buildCommand": "npm run knowledge:build && npm run build",
+  "outputDirectory": "dist",
+  "functions": {
+    "api/agent.ts": {
+      "runtime": "nodejs22.x",
+      "memory": 1024,
+      "maxDuration": 60,
+      "includeFiles": "{knowledge/**,lib/knowledge/index.json}"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/((?!api/).*)",
+      "destination": "/index.html"
+    }
+  ]
+}
