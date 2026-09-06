@@ -34,6 +34,17 @@ function sseFrame(payload: unknown): Uint8Array {
   return new TextEncoder().encode(`data: ${JSON.stringify(payload)}\n\n`);
 }
 
+function messageText(message: BaseMessage): string {
+  const content = (message as AIMessage)?.content;
+  return typeof content === "string"
+    ? content
+    : Array.isArray(content)
+      ? content
+          .map((c: any) => (typeof c === "string" ? c : (c?.text ?? "")))
+          .join("")
+      : "";
+}
+
 async function readJsonBody(req: Request): Promise<AgentRequestBody> {
   try {
     return (await req.json()) as AgentRequestBody;
@@ -107,6 +118,7 @@ export default async function handler(req: Request): Promise<Response> {
         }
 
         let sawClarify = false;
+        let sentAnswerText = false;
         const seenToolResults = new Set<string>();
 
         for await (const [mode, payload] of await streamAgent(input, threadConfig)) {
@@ -154,6 +166,20 @@ export default async function handler(req: Request): Promise<Response> {
                   send({ type: "tool_result", tool: r.tool, data: r.data });
                 }
               }
+
+              if (nodeName === "generate" && !sentAnswerText) {
+                const messages = nodeState?.messages as BaseMessage[] | undefined;
+                const final = messages?.find(
+                  (m) => m?.getType?.() === "ai" && !(m as AIMessage).tool_calls?.length
+                );
+                if (final) {
+                  const text = messageText(final);
+                  if (text) {
+                    sentAnswerText = true;
+                    send({ type: "token", text });
+                  }
+                }
+              }
             }
             continue;
           }
@@ -162,16 +188,11 @@ export default async function handler(req: Request): Promise<Response> {
             const [chunk, meta] = payload as [BaseMessage, { langgraph_node?: string }];
             if (meta?.langgraph_node !== "generate") continue;
 
-            const content = (chunk as AIMessage)?.content;
-            const text =
-              typeof content === "string"
-                ? content
-                : Array.isArray(content)
-                  ? content
-                      .map((c: any) => (typeof c === "string" ? c : (c?.text ?? "")))
-                      .join("")
-                  : "";
-            if (text) send({ type: "token", text });
+            const text = messageText(chunk);
+            if (text) {
+              sentAnswerText = true;
+              send({ type: "token", text });
+            }
           }
         }
 
