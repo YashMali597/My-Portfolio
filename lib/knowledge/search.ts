@@ -51,21 +51,36 @@ export interface SearchOptions {
 }
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const INDEX_PATH = join(HERE, "index.json");
+
+function resolveIndexPath(): string | null {
+  const candidates = [
+    // Source/dev layout and Netlify included_files layout.
+    join(process.cwd(), "lib", "knowledge", "index.json"),
+    // Original colocated layout used when running directly from lib/knowledge.
+    join(HERE, "index.json"),
+    // Bundled function layouts can place the compiled module under a function
+    // directory while preserving included files at the deployment root.
+    join(HERE, "..", "..", "lib", "knowledge", "index.json"),
+    join(HERE, "..", "..", "..", "lib", "knowledge", "index.json"),
+  ];
+
+  return candidates.find((path) => existsSync(path)) ?? null;
+}
 
 let cachedIndex: KnowledgeIndex | null = null;
 
 export function loadIndex(): KnowledgeIndex {
   if (cachedIndex) return cachedIndex;
 
-  if (!existsSync(INDEX_PATH)) {
+  const indexPath = resolveIndexPath();
+  if (!indexPath) {
     throw new Error(
       "\n  lib/knowledge/index.json not found.\n" +
         "  Run `npm run knowledge:build` to generate it.\n"
     );
   }
 
-  const parsed = JSON.parse(readFileSync(INDEX_PATH, "utf8")) as KnowledgeIndex;
+  const parsed = JSON.parse(readFileSync(indexPath, "utf8")) as KnowledgeIndex;
 
   // Guard against the most damaging silent failure in this whole layer: an
   // index built with a different embedder. The vectors would still be numbers

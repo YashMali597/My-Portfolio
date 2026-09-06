@@ -16,7 +16,22 @@ import matter from "gray-matter";
 import { z } from "zod";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-export const KNOWLEDGE_DIR = join(HERE, "..", "..", "knowledge");
+
+function resolveKnowledgeDir(): string {
+  const candidates = [
+    // Source/dev layout and Netlify included_files layout.
+    join(process.cwd(), "knowledge"),
+    // Original source-relative layout.
+    join(HERE, "..", "..", "knowledge"),
+    // Bundled function layouts can move compiled modules under the function
+    // directory while preserving included files at the deployment root.
+    join(HERE, "..", "..", "..", "knowledge"),
+  ];
+
+  return candidates.find((path) => existsSync(path)) ?? candidates[0];
+}
+
+export const KNOWLEDGE_DIR = resolveKnowledgeDir();
 
 export type SourceType =
   | "project"
