@@ -44,17 +44,6 @@ function Chips({ items, variant = "" }: { items: string[]; variant?: string }) {
   );
 }
 
-/** Renders one narrative section, skipped entirely when undocumented. */
-function Section({ label, body }: { label: string; body?: string }) {
-  if (!body || !body.trim()) return null;
-  return (
-    <div className="gen-section">
-      <h5 className="gen-section-title">{label}</h5>
-      <p className="gen-section-body">{body.trim()}</p>
-    </div>
-  );
-}
-
 function EmptyNote({ children }: { children: React.ReactNode }) {
   return (
     <div className="gen-empty">
@@ -68,6 +57,15 @@ function EmptyNote({ children }: { children: React.ReactNode }) {
 /* getProject                                                                 */
 /* -------------------------------------------------------------------------- */
 
+/**
+ * A compact identity card for the project the agent just looked up — title,
+ * one-liner, stack, skills, links. Deliberately NOT the narrative sections:
+ * rendering Problem/Architecture/Decisions/Challenges/Impact reprinted the
+ * whole source doc above the answer, so the reader hit the reference material
+ * before the response they actually asked for. The source-file path is left
+ * off for the same reason — the card names the project, and the knowledge
+ * base's file layout is not something the reader asked to see.
+ */
 export function ProjectBlock({ data }: BlockProps) {
   if (!data?.found || !data?.project) {
     if (data?.error) return <EmptyNote>{data.error}</EmptyNote>;
@@ -101,14 +99,6 @@ export function ProjectBlock({ data }: BlockProps) {
 
       <Chips items={p.skills ?? []} variant="gen-chip--skill" />
 
-      <div className="gen-sections">
-        <Section label="Problem" body={p.sections?.problem} />
-        <Section label="Architecture" body={p.sections?.architecture} />
-        <Section label="Key decisions" body={p.sections?.decisions} />
-        <Section label="Challenges" body={p.sections?.challenges} />
-        <Section label="Impact" body={p.sections?.impact} />
-      </div>
-
       {links.length > 0 && (
         <div className="gen-links">
           {links.map(([label, url]) => (
@@ -124,8 +114,6 @@ export function ProjectBlock({ data }: BlockProps) {
           ))}
         </div>
       )}
-
-      <footer className="gen-source">{p.sourceFile}</footer>
     </article>
   );
 }

@@ -469,28 +469,6 @@
   background: rgba(168, 85, 247, 0.06);
 }
 
-.gen-sections {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  margin-top: 0.75rem;
-}
-.gen-section-title {
-  margin: 0 0 0.25rem;
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--accent-cyan);
-}
-.gen-section-body {
-  margin: 0;
-  font-size: 0.84rem;
-  line-height: 1.6;
-  color: var(--text-muted);
-  white-space: pre-wrap;
-}
-
 .gen-links {
   display: flex;
   gap: 0.75rem;
@@ -506,15 +484,6 @@
 }
 .gen-link:hover {
   text-decoration: underline;
-}
-
-.gen-source {
-  margin-top: 0.75rem;
-  padding-top: 0.6rem;
-  border-top: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.06));
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  color: var(--text-dim);
 }
 
 /* Project grid */
@@ -934,8 +903,7 @@
 /* On wide screens the promoted console shouldn't stretch to an unreadable
    line length — cap the measure, not the panel. */
 @media (min-width: 1200px) {
-  .agent-console--full .agent-paragraph,
-  .agent-console--full .gen-section-body {
+  .agent-console--full .agent-paragraph {
     max-width: 76ch;
   }
 }

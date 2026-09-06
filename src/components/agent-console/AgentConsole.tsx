@@ -10,6 +10,7 @@ import usePrefersReducedMotion from "../../hooks/usePrefersReducedMotion";
 import { subscribeToAsk } from "../../../lib/agent/agentBus";
 import TracePanel from "./TracePanel";
 import ToolBlock from "./generative-ui/blocks";
+import { renderRichText } from "../../lib/richText";
 
 import { projects } from "../../data/site-content";
 
@@ -44,27 +45,22 @@ export interface AgentConsoleProps {
 
 /**
  * Streamed prose with a blinking cursor while tokens are still arriving.
- * Renders paragraphs on blank lines and bolds `**...**`, which is as much
+ * Renders paragraphs on blank lines and hands each one to renderRichText for
+ * the inline subset (`**bold**`, `*italic*`, code, links), which is as much
  * markdown as the generation model reliably produces — a full markdown parser
  * would be more machinery than the output justifies.
  */
 function StreamedText({ text, streaming }: { text: string; streaming: boolean }) {
-  const paragraphs = text.split(/\n\s*\n/).filter((p) => p.trim());
+  const normalized = text.replace(/\\\*/g, "*");
+  const paragraphs = normalized.split(/\n\s*\n/).filter((p) => p.trim());
 
   return (
     <div className="agent-text">
       {paragraphs.map((para, i) => {
         const isLast = i === paragraphs.length - 1;
-        const parts = para.split(/(\*\*[^*]+\*\*)/g);
         return (
           <p key={i} className="agent-paragraph">
-            {parts.map((part, j) =>
-              part.startsWith("**") && part.endsWith("**") ? (
-                <strong key={j}>{part.slice(2, -2)}</strong>
-              ) : (
-                <span key={j}>{part}</span>
-              )
-            )}
+            {renderRichText(para)}
             {streaming && isLast && <span className="agent-cursor" aria-hidden="true" />}
           </p>
         );
